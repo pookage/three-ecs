@@ -17,7 +17,7 @@ The main idea is that we have an `Entity`, capable of having:
 
  This is handled with the footprint:
 
- ```
+ ```javascript
 new Entity(
 	children, 
 	components, 
