@@ -108,8 +108,7 @@ new Entity(
 This will be expanded with more robust documentation later - but, for now, here's the gist:
 
 ```javascript
-import { World, Entity } from "three-ecs";
-import Component from "three-ecs/component.js";
+import { World, Entity, Component } from "three-ecs";
 
 class MyComponent extends Component {
 	// CONFIG
