@@ -5,7 +5,7 @@ This library defines an Entity Component System for the three.js library, and in
 ## Installation
 
 1. Ensure that three.js has already been added to your `importmap`
-2. Clone this repo to your project folder
+2. Clone this repo to your project folder, or add it as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
 3. Add `three-ecs` to your `importmap`
 
 ## Usage
