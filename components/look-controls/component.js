@@ -48,9 +48,9 @@ export default class LookControls extends Component {
 
 	// PROPERTIES
 	// --------------------------------
-	#step    = 0; // (number) base look speed scale by sensitivity
-	#invertY = 1;
-	#invertX = 1;
+	#step     = 0; // (number) base look speed scale by sensitivity
+	#invertY  = 1;
+	#invertX  = 1;
 
 
 	// LIFECYCLE JAZZ
@@ -92,26 +92,30 @@ export default class LookControls extends Component {
 		// only update the rotation if we're in look mode
 		if(this.#isLooking){
 			// update the horizontal rotation if the mouse has had some horizontal movement
-			if(this.#input.current.x !== this.#input.previous.x){		
-				this.entity.rotation.y += MathUtils.degToRad(
-					// calculate the base sensitivity
-					(this.#step * deltaTime) * 
-					// scale based on the intensity of the input
-					(this.#input.previous.x - this.#input.current.x) *
-					// invert input if requested in setup
-					this.#invertX
+			if(this.#input.current.x !== this.#input.previous.x){
+				this.entity.rotateY(
+					MathUtils.degToRad(
+						// calculate the base sensitivity
+						(this.#step * deltaTime) * 
+						// scale based on the intensity of the input
+						(this.#input.previous.x - this.#input.current.x) *
+						// invert input if requested in setup
+						this.#invertX
+					)
 				);
 			}
 			
 			// update the vertical rotation if the mouse has had some vertical movement
 			if(this.#input.current.y !== this.#input.previous.y){
-				this.entity.rotation.x += MathUtils.degToRad(
-					// calculate the base sensitivity
-					(this.#step * deltaTime) * 
-					// scale based on the intensity of the input
-					(this.#input.previous.y - this.#input.current.y) *
-					// invert input if requested in setup
-					this.#invertY
+				this.entity.rotateX(
+					MathUtils.degToRad(
+						// calculate the base sensitivity
+						(this.#step * deltaTime) * 
+						// scale based on the intensity of the input
+						(this.#input.previous.y - this.#input.current.y) *
+						// invert input if requested in setup
+						this.#invertY
+					)
 				);
 			}
 		}

@@ -14,7 +14,7 @@ export default class WASDControls extends Component {
 			// movement speed in deg/s
 			rotationSpeed: {
 				type: "number",
-				default: 45
+				default: 30
 			}
 		}
 	}// schema
@@ -120,7 +120,7 @@ export default class WASDControls extends Component {
 		this.#rotationStep    = (MathUtils.degToRad(this.data.rotationSpeed) / 1000) * this.#sprintMultiplier * deltaTime;
 
 		this.entity.translateOnAxis(this.#translationAxis, this.#translationStep);
-		this.entity.rotation.z += this.#rollDirection * this.#rotationStep;
+		this.entity.rotateZ(this.#rollDirection * this.#rotationStep);
 	}// tick
 
 
