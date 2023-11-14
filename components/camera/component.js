@@ -1,7 +1,9 @@
 import { PerspectiveCamera } from "three";
 
-import { CAMERA_ADDED, CAMERA_REMOVED } from "./../../events.js";
+import { CAMERA_ADDED, CAMERA_REMOVED } from "./events.js";
 import Component from "./../../component.js";
+import { parseProperty } from "./../../utils.js";
+
 
 export default class Camera extends Component {
 	// CONFIG
@@ -116,13 +118,16 @@ export default class Camera extends Component {
 		}
 	}// #createCamera
 	#updateCamera = (camera, property, value) => {
+
+		const parsedValue = parseProperty(value, Camera.schema[property].type);
+
 		switch(property){
 			// these property names map directly to the THREE.PerspectiveCamera
 			case "aspect":
 			case "far":
 			case "fov":
 			case "near": {
-				this.#camera[property] = value;
+				camera[property] = value;
 				break;
 			}
 		}

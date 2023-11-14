@@ -1,3 +1,5 @@
+import { Color } from "three";
+
 export function generateReactiveShallowState(initialState, callback){
 	return new Proxy(initialState, {
 		set(object, property, value){
@@ -23,3 +25,11 @@ export function generateReactiveShallowState(initialState, callback){
 export function isObject (obj) {
 	return typeof obj === 'object' && obj !== null
 }// isObject
+
+export function parseProperty(value, type){
+	switch(type){
+		case "color" : return value.isColor ? value : new Color(value);
+		case "number": return typeof value === "number" ? value : parseFloat(value);
+		default:       return value;
+	}
+}// parseProperty

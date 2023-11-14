@@ -1,5 +1,8 @@
-import { MeshBasicMaterial, Color } from "three";
+import { MeshBasicMaterial, MeshStandardMaterial } from "three";
+
 import Component from "./../../component.js";
+import { parseProperty } from "./../../utils.js";
+
 
 export default class Material extends Component {
 	// CONFIG
@@ -8,7 +11,8 @@ export default class Material extends Component {
 		return {
 			type: {
 				oneOf: [
-					"basic"
+					"basic",
+					"standard"
 				]
 			},
 			color: {
@@ -48,10 +52,7 @@ export default class Material extends Component {
 				}
 
 				case "color": {
-
-					console.log(this)
-
-					this.#updateMaterial(property, current);
+					this.#updateMaterial(this.#material, property, current);
 					break;
 				}
 			}
@@ -62,29 +63,37 @@ export default class Material extends Component {
 	// UTILS
 	// -------------------------------
 	#generateMaterial = data => {
-		switch(data.type){
-			case "basic": {
-				const {
-					color
-				} = data;
+		const {
+			color,
+			type
+		} = data;
 
-				this.#material = new MeshBasicMaterial({ color })
+		const common = {
+			color: parseProperty(color, Material.schema.color.type)
+		};
+
+		switch(type){
+			case "basic": {
+				this.#material = new MeshBasicMaterial({ ...common })
 				break;
+			}
+			case "standard": {
+				this.#material = new MeshStandardMaterial({ ...common });
+				break;
+			}
+			default: {
+				console.error("[Material] Cannot create material - unknown type:", type)
 			}
 		}
 	}// #generateMaterial
 
-	#updateMaterial = (property, value) => {
+	#updateMaterial = (material, property, value) => {
+
+		const parsedValue = parseProperty(value, Material.schema[property].type)
+
 		switch(property){
 			case "color": {
-
-				console.log(value)
-
-				const color = value.isColor
-					? value             // use the THREE.Color if one's been given
-					: new Color(value); // otherwise generate THREE.Color from the input instead
-
-				this.#material.color = color;	
+				material[property] = parsedValue;	
 			}
 		}
 	}// #updateMaterial

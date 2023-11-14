@@ -1,7 +1,7 @@
 import { Scene, WebGLRenderer } from "three";
 
 import Entity from "./entity.js";
-import { CAMERA_ADDED, CAMERA_REMOVED } from "./events.js";
+import { CAMERA_ADDED, CAMERA_REMOVED } from "./components/camera/events.js";
 
 export default class World extends Scene {
 
