@@ -1,3 +1,4 @@
+import { Vector3, MathUtils } from "three"
 import Component from "./../../component.js";
 
 export default class WASDControls extends Component {
@@ -9,6 +10,11 @@ export default class WASDControls extends Component {
 			speed: {
 				type: "number",
 				default: 1
+			},
+			// movement speed in deg/s
+			rotationSpeed: {
+				type: "number",
+				default: 45
 			}
 		}
 	}// schema
@@ -17,53 +23,77 @@ export default class WASDControls extends Component {
 	// STATE
 	// ------------------------------------
 	// the current direction of travel of the attached entity
-	#direction = {
-		x: 0,
-		z: 0
-	};
+	#translationAxis = new Vector3();
+	#rollDirection   = 0;
+	#translationStep = 0; 
+	#rotationStep    = 0;
 
 	// how much the sprint affects the speed
 	#sprintMultiplier = 1;
 
 	// which inputs are currently being interpreted
 	#inputs = new Proxy({
+		// modifiers
+		sprint:    false,
+
+		// movement
 		forwards:  false,
 		backwards: false,
 		left:      false,
 		right:     false,
-		sprint:    false
+
+		// rotation
+		rollLeft:  false,
+		rollRight: false
 	}, {
 		// intercept changes to the #inputs object and convert them to an updated #direction
 		set: (object, property, value) => {
 			// honour the most recently-pressed input when calculating changes in #direction
 			switch(property){
-				case "forwards": {
-					if(value)                 this.#direction.z = -1;
-					else if(object.backwards) this.#direction.z = +1;
-					else                      this.#direction.z = 0;
-					break;
-				}
-				case "backwards": {
-					if(value)                this.#direction.z = +1;
-					else if(object.forwards) this.#direction.z = -1;
-					else                     this.#direction.z = 0;
-					break;
-				}
-				case "left": {
-					if(value)             this.#direction.x = -1;
-					else if(object.right) this.#direction.x = +1;
-					else                  this.#direction.x =  0;
-					break;
-				}
-				case "right": {
-					if(value)            this.#direction.x = +1;
-					else if(object.left) this.#direction.x = -1;
-					else                 this.#direction.x =  0;
-					break;
-				}
+				// modifiers
 				case "sprint": {
 					if(value) this.#sprintMultiplier = 3;
 					else      this.#sprintMultiplier = 1;
+					break;
+				}
+
+				// movement
+				case "forwards": {
+					if(value)                 this.#translationAxis.z = -1;
+					else if(object.backwards) this.#translationAxis.z = +1;
+					else                      this.#translationAxis.z = 0;
+					break;
+				}
+				case "backwards": {
+					if(value)                this.#translationAxis.z = +1;
+					else if(object.forwards) this.#translationAxis.z = -1;
+					else                     this.#translationAxis.z = 0;
+					break;
+				}
+				case "left": {
+					if(value)             this.#translationAxis.x = -1;
+					else if(object.right) this.#translationAxis.x = +1;
+					else                  this.#translationAxis.x =  0;
+					break;
+				}
+				case "right": {
+					if(value)            this.#translationAxis.x = +1;
+					else if(object.left) this.#translationAxis.x = -1;
+					else                 this.#translationAxis.x =  0;
+					break;
+				}
+
+				// rotation
+				case "rollLeft": {
+					if(value)                 this.#rollDirection = +1;
+					else if(object.rollRight) this.#rollDirection = -1;
+					else                      this.#rollDirection =  0;
+					break;
+				}
+				case "rollRight": {
+					if(value)                 this.#rollDirection = -1;
+					else if (object.rollLeft) this.#rollDirection = +1;
+					else                      this.#rollDirection =  0;
 					break;
 				}
 			}
@@ -86,10 +116,11 @@ export default class WASDControls extends Component {
 	}// disconnected
 
 	tick(time, deltaTime){
-		const step = (this.data.speed / 1000) * deltaTime;
+		this.#translationStep = (this.data.speed / 1000) * this.#sprintMultiplier * deltaTime;
+		this.#rotationStep    = (MathUtils.degToRad(this.data.rotationSpeed) / 1000) * this.#sprintMultiplier * deltaTime;
 
-		this.entity.position.x += (step * this.#direction.x * this.#sprintMultiplier);
-		this.entity.position.z += (step * this.#direction.z * this.#sprintMultiplier);
+		this.entity.translateOnAxis(this.#translationAxis, this.#translationStep);
+		this.entity.rotation.z += this.#rollDirection * this.#rotationStep;
 	}// tick
 
 
@@ -115,6 +146,8 @@ export default class WASDControls extends Component {
 			case "KeyA":       { this.#inputs.left      = true; break; }
 			case "KeyS":       { this.#inputs.backwards = true; break; }
 			case "KeyD":       { this.#inputs.right     = true; break; }
+			case "KeyQ":       { this.#inputs.rollLeft  = true; break; }
+			case "KeyE":       { this.#inputs.rollRight = true; break; }
 		}
 	}// #handleKeyDown
 	#handleKeyUp = (event) => {
@@ -125,6 +158,8 @@ export default class WASDControls extends Component {
 			case "KeyA":       { this.#inputs.left      = false; break; }
 			case "KeyS":       { this.#inputs.backwards = false; break; }
 			case "KeyD":       { this.#inputs.right     = false; break; }
+			case "KeyQ":       { this.#inputs.rollLeft  = false; break; }
+			case "KeyE":       { this.#inputs.rollRight = false; break; }
 		}
 	}// #handleKeyUp
 }// WASDControls
