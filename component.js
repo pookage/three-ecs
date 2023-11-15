@@ -31,9 +31,6 @@ export default class Component {
 		// generate a reactive internal "data" state that calls 'update' when modified
 		const config = this.generateVerifiedConfig(userConfig);
 		const data   = this.data = generateReactiveShallowState(config, this.update);
-
-		// call the init() lifecycle with the new reactive state
-		// this.init(data);
 	}// constructor
 
 	// called when the component has been added to an entity
