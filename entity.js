@@ -204,7 +204,6 @@ export default class Entity extends Object3D {
 		if(this.constructor.mappings[property]){
 			const [ componentName, componentProperty ] = this.constructor.mappings[property].split(".");
 			const component = this.#components.get(toProperCase(componentName));
-			console.log({ component })
 			component.data[componentProperty] = value;
 		} 
 		// otherwise apply the property directly

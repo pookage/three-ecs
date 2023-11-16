@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ThreeECS | Hello World</title>
+		<script type="importmap">
+			{
+				"imports": {
+					"three":           "https://unpkg.com/three@0.157.0/build/three.module.min.js",
+					"three/addons/":   "https://unpkg.com/three@0.157.0/examples/jsm/",
+					"three-ecs":       "./index.js",
+					"three-ecs/":      "./"
+				}
+			}
+		</script>
+		<script type="module">
+			import { World, Entity, Component, componentRegistry } from "three-ecs";
+			import Box          from "three-ecs/primitives/box/index.js";
+			import Camera       from "three-ecs/components/camera/index.js";
+			import Geometry     from "three-ecs/components/geometry/index.js";
+			import Light        from "three-ecs/components/light/index.js";
+			import LookControls from "three-ecs/components/look-controls/index.js";
+			import Material     from "three-ecs/components/material/index.js";
+			import Mesh         from "three-ecs/components/mesh/index.js";
+			import WASDControls from "three-ecs/components/wasd-controls/index.js";
+
+
+			// EXAMPLE CUSTOM COMPONENT
+			// ----------------------------------------------
+			// define your component
+			class AutoSpin extends Component {
+				static get schema(){
+					return {
+						speed: {
+							type: "number",
+							default: 0.001
+						}
+					}
+				}// schema
+
+				tick(time, deltaTime){
+					this.entity.rotation.y += this.data.speed * deltaTime;
+				}// tick
+			}// AutoSpin
+
+			// add your component to the registry
+			componentRegistry.set("auto-spin", AutoSpin);
+
+			
+			// CREATE AND CONFIGURE THE SCENE
+			// ----------------------------------------------
+			const world = new World([
+				// CAMERA
+				new Entity([], [
+					new Camera(),
+					new LookControls()
+				], {
+					position: {
+						z: 3,
+						y: 1.5
+					},
+					rotation: {
+						x: -20
+					}
+				}),
+
+				// LIGHTING
+				// some ambient lighting
+				new Entity([], [
+					new Light({ 
+						type: "ambient",
+						intensity: 0.05
+					})
+				]),
+				// a light spherethat can be moved with WASD
+				new Entity([], [
+					new Light({ type: "point" }),
+					new Geometry({ primitive: "sphere", radius: 0.1 }),
+					new Material({ color: "white" }),
+					new Mesh(),
+					new WASDControls()
+				], {
+					position: {
+						y: 1
+					}
+				}),
+
+				// BOXES
+				// red box with flat shading
+				new Entity([], [
+					new Geometry({ 
+						primitive: "box",
+						height: 0.75,
+						width:  0.75,
+						depth:  0.75
+					}),
+					new Material({
+						color: "red",
+					}),
+					new Mesh()
+				], {
+					position: {
+						x: -1
+					}
+				}),
+
+				// blue box that reacts to lighting
+				new Entity([], [
+					new Geometry({ 
+						primitive: "box"
+					}),
+					new Material({
+						color: "blue",
+						type: "standard"
+					}),
+					new Mesh(),
+					new AutoSpin()
+				], {
+					position: {
+						x: 1
+					}
+				}),
+
+				// green box using the Box primitive that's lurking in the background
+				new Box([], [], {
+					color: "green",
+					width: 3,
+					height: 2,
+					position: {
+						z: -3
+					}
+				})
+			]);
+
+			// get the world revv'd up and starting
+			world.play();
+
+			// add the canvas to the DOM
+			document.body.appendChild(world.canvas);
+		</script>
+
+		<style>
+			html, body, canvas {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+	
+
+	</body>
+</html>

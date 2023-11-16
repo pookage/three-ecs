@@ -40,7 +40,7 @@ export default class Mesh extends Component {
 		this.#createMesh(this.entity);
 	}// dependencyAdded
 	dependencyUpdated(component, property, previous, current){
-		this.#createMesh(this.entity);
+		this.#createMesh(this.entity);	
 	}// dependencyUpdated
 	dependencyRemoved(component){
 		this.#createMesh(this.entity);
@@ -50,16 +50,21 @@ export default class Mesh extends Component {
 	// UTILS
 	// ---------------------------------
 	#createMesh = (entity) => {
-		const geometry = entity.components.get("Geometry")?.geometry;
-		const material = entity.components.get("Material")?.material;
-
-		// remove any existing meshes
-		if(this.#mesh) entity.remove(this.#mesh)
+		const geometry        = entity.components.get("Geometry")?.geometry;
+		const material        = entity.components.get("Material")?.material;
+		const geometryChanged = this.#mesh?.geometry !== geometry;
+		const materialChanged = this.#mesh?.material !== material;
 
 		// generate and add the new mesh
-		if(geometry && material){
+		if(geometryChanged || materialChanged){
+		
+			// remove any existing meshes
+			if(this.#mesh) entity.remove(this.#mesh)
+
+			// add the newly-modified mesh
 			const mesh = this.#mesh = new THREEMesh(geometry, material)	
-			entity.add(mesh);
+			entity.add(mesh);	
+			
 		}
 	}// #createMesh
 }// Mesh
