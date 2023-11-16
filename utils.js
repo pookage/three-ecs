@@ -33,3 +33,10 @@ export function parseProperty(value, type){
 		default:       return value;
 	}
 }// parseProperty
+
+export function toProperCase(text){
+	// NOTE: this was adapted from: https://stackoverflow.com/questions/64489395/converting-snake-case-string-to-title-case
+	return text.replace (/^[-_]*(.)/, (_, c) => c.toUpperCase()) // Initial char (after -/_)
+	           .replace (/[-_]+(.)/g, (_, c) => c.toUpperCase()) // First char after each -/_	
+}// toProperCase
+

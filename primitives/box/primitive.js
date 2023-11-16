@@ -1,6 +1,6 @@
-import Primitive from "./../../primitive.js";
+import Entity from "./../../entity.js";
 
-export default class Box extends Primitive {
+export default class Box extends Entity {
 	static get defaultComponents(){
 		return {
 			geometry: {
@@ -12,7 +12,7 @@ export default class Box extends Primitive {
 			material: {
 				color: "red",
 				type: "standard"
-			}
+			},
 			mesh: {}
 		}
 	}// defaultComponents

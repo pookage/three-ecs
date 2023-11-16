@@ -1,5 +1,7 @@
 import { Object3D, MathUtils, EventDispatcher } from "three";
-import { isObject } from "./utils.js";
+
+import { isObject, toProperCase } from "./utils.js";
+import { componentRegistry } from "./index.js";
 
 
 export default class Entity extends Object3D {
@@ -17,7 +19,7 @@ export default class Entity extends Object3D {
 	#isRemoving   = false;     // (Boolean) flipped during remove() as this can be trigged on this component directly, or as part of a larger removal by the World()
 
 
-	// INTERFACE
+	// ENTITY INTERFACE
 	// ----------------------------
 	// getters
 	get components()  { return this.#components;  } // only allow components to be accessed, not replaced
@@ -47,16 +49,11 @@ export default class Entity extends Object3D {
 	}// remove
 
 	dispatchEvent(event, ...otherArgs){
-
-		// console.log({event})
-
 		/*
 			NOTE:
 				code copied from the abandoned PR on the THREE.js repo
 				https://github.com/mrdoob/three.js/pull/8368/files
 		*/
-
-		// console.log("dispatching event", event)
 
 		const {
 			stopPropagation,
@@ -74,9 +71,15 @@ export default class Entity extends Object3D {
 
 		if (!propagationStopped && bubbles) {
 			this.parent?.dispatchEvent(event);
-			// console.log("propagating event to parent", this)
 		}
 	}// dispatchEvent
+
+
+	// PRIMITIVES INTERFACE
+	// --------------------------------
+	static get defaultComponents(){ return {} }
+	static get mappings(){ return {}}
+
 
 
 	// LIFECYCLE JAZZ
@@ -91,10 +94,15 @@ export default class Entity extends Object3D {
 		// add child entities to the heirarchy
 		for(const child of children) this.add(child);
 		// add components to the entity
-		for(const component of components) this.addComponent(component);
+		for(const component of [
+			...this.#generateDefaultComponents(this.constructor.defaultComponents),
+			...components
+		]){
+			this.addComponent(component);
+		}
 		// apply properties to the underlying Object3D directly
 		for(const [key, value] of Object.entries(properties)) {
-			if(this.constructor.mappedProperties.includes(key)){
+			if([...this.constructor.mappedProperties, ...Object.keys(this.constructor.mappings) ].includes(key)){
 				this.applyProperty(key, value);	
 			}
 		}
@@ -192,66 +200,76 @@ export default class Entity extends Object3D {
 	// UTILS
 	// ----------------------------
 	applyProperty(property, value){
-		switch(property){
-			case "position": {
-				// receive this property as an {xyz} object, but set it using the threejs Vector3 methods
-				const { 
-					x = 0, 
-					y = 0, 
-					z = 0
-				} = value;
+		// if this property has been mapped to another, then redirect it to the mapped property
+		if(this.constructor.mappings[property]){
+			const [ componentName, componentProperty ] = this.constructor.mappings[property].split(".");
+			const component = this.#components.get(toProperCase(componentName));
+			console.log({ component })
+			component.data[componentProperty] = value;
+		} 
+		// otherwise apply the property directly
+		else {
+			switch(property){
+				case "position": {
+					// receive this property as an {xyz} object, but set it using the threejs Vector3 methods
+					const { 
+						x = 0, 
+						y = 0, 
+						z = 0
+					} = value;
 
-				this.position.set(
-					parseFloat(x), 
-					parseFloat(y), 
-					parseFloat(z)
-				);
-				break;
-			}
-			case "rotation": {
-				// receive this property as an {xyz} object in degrees, and apply using the threejs Euler method in radians
-				const { 
-					x = 0, 
-					y = 0, 
-					z = 0 
-				} = value;
+					this.position.set(
+						parseFloat(x), 
+						parseFloat(y), 
+						parseFloat(z)
+					);
+					break;
+				}
+				case "rotation": {
+					// receive this property as an {xyz} object in degrees, and apply using the threejs Euler method in radians
+					const { 
+						x = 0, 
+						y = 0, 
+						z = 0 
+					} = value;
 
-				this.rotation.set(
-					MathUtils.degToRad(x), 
-					MathUtils.degToRad(y), 
-					MathUtils.degToRad(z)
-				);
-				break;
-			}
-			case "scale": {
-				const { x, y, z } = isObject(value) 
-					// if we have an object, use its xyz properties and default to 1 for anything undefined
-					? {
-						x: value.x ?? 1,
-						y: value.y ?? 1,
-						z: value.z ?? 1
-					} 
-					// if we have a single value, apply it equally to all axis
-					: {
-						x: value,
-						y: value,
-						z: value
-					};
-				this.scale.set(
-					parseFloat(x),
-					parseFloat(y),
-					parseFloat(z)
-				);
-				break;
-			}
+					this.rotation.set(
+						MathUtils.degToRad(x), 
+						MathUtils.degToRad(y), 
+						MathUtils.degToRad(z)
+					);
+					break;
+				}
+				case "scale": {
+					const { x, y, z } = isObject(value) 
+						// if we have an object, use its xyz properties and default to 1 for anything undefined
+						? {
+							x: value.x ?? 1,
+							y: value.y ?? 1,
+							z: value.z ?? 1
+						} 
+						// if we have a single value, apply it equally to all axis
+						: {
+							x: value,
+							y: value,
+							z: value
+						};
+					this.scale.set(
+						parseFloat(x),
+						parseFloat(y),
+						parseFloat(z)
+					);
+					break;
+				}
 
-			case "visible": {
-				this.visible = value;
-				break;
-			}
+				case "visible": {
+					this.visible = value;
+					break;
+				}
 
-			// otherwise don'n treat this property with any special case
-			default: this[property] = value;
+				// otherwise don'n treat this property with any special case
+				default: this[property] = value;
+			}
 		}
 	}// applyProperty
 	addComponent(component){
@@ -297,10 +315,12 @@ export default class Entity extends Object3D {
 		// remove the component from this entity
 		this.#components.delete(componentName);
 	}// removeComponent
+
+	// UTILS
+	// ---------------------------------
+	#generateDefaultComponents = (components) => {
+		return Object.entries(components).map(
+			([ name, properties]) => new (componentRegistry.get(name))(properties)
+		);
+	}// generateDefaultComponents
 }// Entity
-
-console.log(`
-	TODO: Take all the lifecycle etc methods from the Entity class, and export them as functions that the World class can then import and use
-		ie. this.removeComponent = Entity.removeComponent.bind(this)
-
-`)

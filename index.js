@@ -1,6 +1,5 @@
 import Component from "./component.js";
 import Entity from "./entity.js";
-import Primitive from "./primitive.js";
 import World from "./world.js";
 
 import components from "./components/index.js";
@@ -15,7 +14,6 @@ for(const { name, definition } of components){
 export {
 	Component,
 	Entity,
-	Primitive,
 	World,
 	components,
 	componentRegistry
