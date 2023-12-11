@@ -150,12 +150,17 @@ export default class World extends Scene {
 		const {
 			width: newWidth,
 			height: newHeight
-		} = getComputedStyle(this.canvas.getRootNode().host || this.canvas.parentElement);
+		} = (this.canvas.getRootNode().host || this.canvas.parentElement).getBoundingClientRect();
+
+		// if we don't have any dimensions yet, then assume something went wrong and to re-check ASAP
+		if(newWidth === 0 || newHeight === 0) requestAnimationFrame(this.#updateRendererSizes)
 
 		// calculate the new propteries based on the current viewport size
 		const width       = parseInt(newWidth) * this.#samplerate;
 		const height      = parseInt(newHeight) * this.#samplerate;
 		const aspectRatio = width / height;
+
+		console.log(width, height)
 
 		// apply new properties to the camera and renderer
 		if(this.#camera) this.#camera.aspect = aspectRatio;
