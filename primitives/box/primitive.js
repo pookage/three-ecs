@@ -19,6 +19,7 @@ export default class Box extends Entity {
 
 	static get mappings(){
 		return {
+			...Entity.mappings,
 			color: "material.color",
 			width: "geometry.width",
 			height: "geometry.height",

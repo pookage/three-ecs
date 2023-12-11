@@ -29,9 +29,7 @@ export default class World extends Scene {
 	get cameras(){ return this.#cameras; }
 	get canvas() { return this.#renderer.domElement; }
 
-	static get mappedProperties(){
-		return [];
-	}// mappedProperties
+	static get mappings(){ return {} }
 
 	add(entity){
 		super.add(entity);

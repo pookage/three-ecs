@@ -27,14 +27,14 @@ export default class Entity extends Object3D {
 	get isEntity()    { return true;              } // signal that this Object3D is part of the ECS
 	get isConnected() { return this.#isConnected  } 
 
-	static get mappedProperties(){
-		return [
-			"position",
-			"rotation",
-			"scale",
-			"visible"
-		]
-	}// mappedProperties
+	static get mappings(){
+		return {
+			"position": "entity.position",
+			"rotation": "entity.rotation",
+			"scale":    "entity.scale",
+			"visible":  "entity.visible"
+		}
+	}// mappings
 
 	add(entity, ...otherArgs){
 		super.add(entity, ...otherArgs);
@@ -78,7 +78,6 @@ export default class Entity extends Object3D {
 	// PRIMITIVES INTERFACE
 	// --------------------------------
 	static get defaultComponents(){ return {} }
-	static get mappings(){ return {}}
 
 
 
@@ -102,7 +101,7 @@ export default class Entity extends Object3D {
 		}
 		// apply properties to the underlying Object3D directly
 		for(const [key, value] of Object.entries(properties)) {
-			if([...this.constructor.mappedProperties, ...Object.keys(this.constructor.mappings) ].includes(key)){
+			if(Object.keys(this.constructor.mappings).includes(key)){
 				this.applyProperty(key, value);	
 			}
 		}
@@ -199,14 +198,13 @@ export default class Entity extends Object3D {
 
 	// UTILS
 	// ----------------------------
-	applyProperty(property, value){
-		// if this property has been mapped to another, then redirect it to the mapped property
-		if(this.constructor.mappings[property]){
-			const [ componentName, componentProperty ] = this.constructor.mappings[property].split(".");
-			const component = this.#components.get(toProperCase(componentName));
-			component.data[componentProperty] = value;
-		} 
-		// otherwise apply the property directly
+	applyProperty(key, value){
+		const [ name, property ] = this.constructor.mappings[key]?.split(".");
+
+		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
+		if(name !== "entity") this.#components.get(toProperCase(name)).data[property] = value;
+
+		// otherwise assuming we want to manipulate the entity directly and parse it here & now
 		else {
 			switch(property){
 				case "position": {
@@ -267,9 +265,9 @@ export default class Entity extends Object3D {
 				}
 
 				// otherwise don'n treat this property with any special case
-				default: this[property] = value;
+				default: this[key] = value;
 			}
-		}
+		} 
 	}// applyProperty
 	addComponent(component){
 		const componentName = component.constructor.name;
