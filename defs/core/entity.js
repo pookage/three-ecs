@@ -1,12 +1,14 @@
 import { Object3D, MathUtils } from "three";
 
-import ECSObject from "./ecs-object/js";
+import ECSObject from "./ecs-object.js";
 import { componentRegistry, toProperCase } from "../../utils/index.js";
 
 
 export default class Entity extends Object3D {
 	// PRIVATE PROPERTIES
 	// -------------------------------------
+	// helpers
+	#component;
 	// static state
 	#isPlaying    = false;
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
@@ -85,22 +87,24 @@ export default class Entity extends Object3D {
 		}
 	}// #tock
 
-	add(entity, ...otherArgs){ 
-		ECSObject.add.apply(this, entity, ...otherArgs); 
+	add(entity, ...otherArgs){
+		super.add(entity, ...otherArgs);
+		ECSObject.add.apply(this, [ entity ]); 
 	}// add
 	remove(entity){ 
-		ECSObject.remove.apply(this, entity); 
+		super.remove(entity);
+		ECSObject.remove.apply(this, [ entity ]); 
 	} // remove
 
 	addComponent(component){
-		ECSObject.addComponent.apply(this, component)
+		ECSObject.addComponent.apply(this, [ component ])
 	}// addComponent
 	removeComponent(component){
-		ECSObject.removeComponent.apply(this, component)
+		ECSObject.removeComponent.apply(this, [ component ])
 	}// removeComponent
 
 	dispatchEvent(event, ...otherArgs){
-		ECSObject.dispatchEvent.apply(this, event, ...otherArgs);
+		ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]);
 	}// dispatchEvent
 
 
@@ -116,7 +120,7 @@ export default class Entity extends Object3D {
 		const components = [ ...defaultComponents, ...initialComponents ];
 
 		// initialise the entity with functionality shared by all ECS entities
-		ECSObject.init.apply(this, children, components, properties);
+		ECSObject.init.apply(this, [ children, components, properties ]);
 
 		// apply mapped properties to the underlying Object3D directly
 		for(const [key, value] of Object.entries(properties)) {

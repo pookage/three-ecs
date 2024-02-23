@@ -1,8 +1,7 @@
 import { Color, MathUtils } from "three";
 
 
-const componentRegistry = new Map();
-
+export const componentRegistry = new Map();
 
 export function findFirstInstanceWithProperty(property){
 	let instance = null;
@@ -19,28 +18,34 @@ export function findFirstInstanceWithProperty(property){
 export function verifyComponentConfig(userConfig, schema){
 	return Object.entries(schema).reduce(
 		(config, [ property, valueSchema ]) => {
-			const doesPropertyExistsInSchema = userConfig.hasOwnProperty(property);
+			const {
+				default: defaultValue,
+				oneOf: permittedValues = []
+			} = valueSchema;
 
-			if(doesPropertyExistsInSchema){
+			const doesPropertyExistInSchema = userConfig.hasOwnProperty(property);
+			const doesPropertyHaveValue     = doesPropertyExistInSchema || typeof defaultValue !== undefined;
+
+			if(doesPropertyHaveValue){
 				const type               = getSchemaPropertyType(property, valueSchema);
-				const value              = parseValueWithSchema(userConfig[property], type, valueSchema);
+				const rawValue           = userConfig[property] || defaultValue || permittedValues[0];
+				const value              = parseValueWithSchema(rawValue, type, valueSchema);
 				const isValueCorrectType = verifyType(value, type);
 
 				if(isValueCorrectType){
-					const {
-						oneOf: permittedValues = [ value ]
-					} = valueSchema;
+					const hasPermittedValues = permittedValues.length > 0;
+					const isValuePermitted   = hasPermittedValues && permittedValues.includes(value);
 
-					if(permittedValues.includes(value)){
+					if(isValuePermitted || !hasPermittedValues ){
 						// Woop! This is the only case in which the property is valid and gets added
 						config[property] = value;
 					} else {
 						console.warn(
-							`[WARNING](${this.constructor.name}) Property ${property}`,
+							`[WARNING](${this.constructor.name}) Property '${property}'`,
 							value,
-							"is not one of the values permitted by this component",
+							"is not one of the values",
 							permittedValues,
-							" - property will be ignored"
+							"permitted by this component - property will be ignored"
 						);
 					}
 				} else {
@@ -52,7 +57,7 @@ export function verifyComponentConfig(userConfig, schema){
 				}
 			} else {
 				console.warn(
-					`[WARNING](${this.constructor.name}) Unable to find property ${property} in component schema - property will be ignored.`
+					`[WARNING](${this.constructor.name}) Unable to derive a value for property ${property} from component schema - property will be ignored.`,
 					this
 				);
 			}
@@ -110,7 +115,7 @@ function getSchemaPropertyType(property, value){
 	const { 
 		type: valueType, 
 		default: defaultValue,
-		oneOf: [] 
+		oneOf = [] 
 	} = value;
 
 	let type;
@@ -145,5 +150,3 @@ function parseValueWithSchema(value, type, schema){
 		default       : return new String(value).toString();
 	}
 }// parseValueWithSchema
-
-export componentRegistry;

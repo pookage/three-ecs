@@ -9,7 +9,7 @@ const ECSObject = {
 		// adopt children
 		for(const child of children) this.add(child);
 		// adopt components
-		for(const component of components) addComponent.apply(this, component);
+		for(const component of components) this.addComponent(component);
 	},//init
 
 	// NOTE: these lifecyle methods might only be needed by the World.js - confirm after testing
@@ -33,15 +33,13 @@ const ECSObject = {
 			if(entity.isEntity) entity.pause();
 		});
 	}, // pause
-	add(entity, ...otherArgs){
-		super.add(entity, ...otherArgs);
+	add(entity){
 		if(entity.isEntity){
 			entity.connected();
 			if(this.isPlaying) entity.play();
 		}
 	},// add
 	remove(entity){
-		super.remove(entity);
 		if(entity.isEntity){
 			entity.disconnected();
 		}

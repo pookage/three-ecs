@@ -1,6 +1,6 @@
 import { Scene, WebGLRenderer } from "three";
 
-import ECSObject from "./ecs-object/js";
+import ECSObject from "./ecs-object.js";
 import { findFirstInstanceWithProperty } from "../../utils/index.js";
 import { CAMERA_ADDED, CAMERA_REMOVED } from "../components/camera/index.js";
 
@@ -13,7 +13,9 @@ export default class World extends Scene {
 
 	// helpers
 	#renderer;
+	#camera;
 	#frame;
+	#deltaTime;
 	#lastTickTime;
 
 	// static state
@@ -64,7 +66,7 @@ export default class World extends Scene {
 		cancelAnimationFrame(this.#frame);
 
 		// clear any event listeners
-		window.removeEventListener("resize", this.#resizeHandler);
+		window.removeEventListener("resize", this.#handleResize);
 		this.removeEventListener(CAMERA_ADDED, this.#updatePrimaryCamera);
 		this.removeEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
 
@@ -99,21 +101,23 @@ export default class World extends Scene {
 	}// pause
 
 	add(entity)   { 
-		ECSObject.add.apply(this, entity);
+		super.add(entity);
+		ECSObject.add.apply(this, [ entity ]);
 	}// add
 	remove(entity){
-		ECSObject.remove.apply(this, entity); 
+		super.remove(entity);
+		ECSObject.remove.apply(this, [ entity ]); 
 	}// remove	
 
 	addComponent(component){
-		ECSObject.addComponent.apply(this, component);
+		ECSObject.addComponent.apply(this, [ component ]);
 	}// addComponent
 	removeComponent(component){
-		ECSObject.removeComponent.apply(this, component);
+		ECSObject.removeComponent.apply(this, [ component ]);
 	}// removeComponent
 
 	dispatchEvent(event, ...otherArgs){
-		ECSObject.dispatchEvent.apply(this, event, ...otherArgs);
+		ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]);
 	}// dispatchEvent
 
 
@@ -125,7 +129,7 @@ export default class World extends Scene {
 		// calculate the time since our last tick
 		this.#deltaTime = time - (this.#lastTickTime || time);
 		// apply tick to all entities in the scene
-		ECSObject.tick.apply(this, time, this.#deltaTime);
+		ECSObject.tick.apply(this, [ time, this.#deltaTime ]);
 		// render the new scene
 		this.#renderer.render(this, this.#camera);
 		// apply any calculations that need to happen AFTER the animation frame
@@ -135,7 +139,7 @@ export default class World extends Scene {
 	}// #tick
 
 	#tock = (time, deltaTime) => {
-		ECSObject.tock.apply(this, time, deltaTime);
+		ECSObject.tock.apply(this, [ time, deltaTime ]);
 	}// #tock
 
 
@@ -144,7 +148,7 @@ export default class World extends Scene {
 	constructor(children = [], components = [], properties = {}){
 		super();
 
-		ECSObject.init.apply(this, children, components, properties);
+		ECSObject.init.apply(this, [ children, components, properties ]);
 
 		const {
 			samplerate = 1 // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
@@ -155,7 +159,7 @@ export default class World extends Scene {
 
 		// initialise required instances
 		this.#renderer = new WebGLRenderer({ antialias: true });
-		this.#camera   = findFirstInstanceWithProperty.apply(this, "isCamera");
+		this.#camera   = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
 
 		// add event listeners
 		window.addEventListener("resize", this.#handleResize);

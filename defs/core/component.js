@@ -10,6 +10,7 @@ export default class Component {
 	// PUBLIC PROPERTIES
 	// ~~ getters ~~
 	get data()   { return this.#data;   } // get data
+	get entity() { return this.#entity; } // get entity
 
 	// ~~ setters ~~
 	set entity(entity) { 
@@ -75,11 +76,12 @@ export default class Component {
 
 	// DEFAULT LIFECYCLE JAZZ
 	// -------------------------------------
-	constructor(userConfig){
-		const verifiedConfig = verifyComponentConfig(
+	constructor(userConfig = {}){
+		const verifiedConfig = verifyComponentConfig.apply(this, [
 			userConfig,
 			this.constructor.schema
-		);
+		]);
+
 		this.#data = generateReactiveShallowState(verifiedConfig, this.update);
 	}// constructor	
 }// Component

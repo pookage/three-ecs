@@ -1,7 +1,7 @@
 // core definitions
 import World from "./defs/core/world.js";
 import Entity from "./defs/core/entity.js";
-import Component from "./defs/ccore/omponent.js";
+import Component from "./defs/core/component.js";
 
 // component definitions
 import Camera from "./defs/components/camera/index.js";
