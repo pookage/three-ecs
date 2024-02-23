@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>THREECS | Demo</title>
+		<script type="importmap">
+			{
+				"imports": {
+					"three":           "https://unpkg.com/three@0.157.0/build/three.module.min.js",
+					"three/addons/":   "https://unpkg.com/three@0.157.0/examples/jsm/",
+					"three-ecs":       "./../index.js",
+					"three-ecs/":      "./../"
+				}
+			}
+		</script>
+		<script type="module">
+			import { World, Camera } from "three-ecs";
+
+			const world = new World([
+				new Entity([], [
+					new Camera()
+				])
+			]);
+			// world.play();
+
+			document.body.appendChild(world.canvas);
+		</script>
+	</head>
+	<body>
+
+	</body>
+</html>
