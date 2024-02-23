@@ -1,7 +1,5 @@
 import { EventDispatcher } from "three";
 
-console.warn("[TODO] Confirm whether the top-level World's traverse() is enough to call the lifecycle methods throughout the scene, or whether child entities need to call these too")
-
 const ECSObject = {
 	// LIFECYCLE JAZZ
 	// -------------------------------------
@@ -13,26 +11,6 @@ const ECSObject = {
 	},//init
 
 	// NOTE: these lifecyle methods might only be needed by the World.js - confirm after testing
-	connected(){
-		this.traverse(entity => {
-			if(entity.isEntity) entity.connected();
-		});
-	},
-	disconnected(){
-		this.traverse(entity => {
-			if(entity.isEntity) entity.disconnected();
-		});
-	},
-	play(){
-		this.traverse(entity => {
-			if(entity.isEntity) entity.play();
-		});
-	}, // play
-	pause(){
-		this.traverse(entity => {
-			if(entity.isEntity) entity.pause();
-		});
-	}, // pause
 	add(entity){
 		if(entity.isEntity){
 			entity.connected();
@@ -44,20 +22,6 @@ const ECSObject = {
 			entity.disconnected();
 		}
 	},// remove
-	tick(time, deltaTime){
-		this.traverse(entity => {
-			if(entity.isEntity){
-				entity.tick(time, deltaTime);
-			}
-		});
-	},// tick
-	tock(time, deltaTime){
-		this.traverse(entity => {
-			if(entity.isEntity){
-				entity.tick(time, deltaTime);
-			}
-		});
-	},// tock
 
 	// UTILS
 	// -------------------------------------

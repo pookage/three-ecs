@@ -25,7 +25,7 @@ export default class Camera extends Component {
 			},
 			// (number) of degrees field-of-view the camera has
 			fov: {
-			 	default: 75
+			 	default: 60
 			},
 			// (number) of meters objects can get close to the camera before they're no-longer rendered
 			near: {
@@ -122,12 +122,9 @@ export default class Camera extends Component {
 
 				// generate a new camera
 				camera = new PerspectiveCamera(fov, aspect, near, far);
-				console.log({ camera, fov, aspect, near, far })
 				break;
 			}
 		}
-
-
 
 		return camera;
 	}// #createCamera

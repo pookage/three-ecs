@@ -32,15 +32,13 @@ export default class World extends Scene {
 	get dependencies() { return this.#dependencies;        }
 	get isPlaying()    { return this.#isPlaying;           }
 
-	test(){ 
-		this.#updatePrimaryCamera();
-	}
-
 	// PUBLIC METHODS
 	// ~~ lifecycle jazz ~~
 	connected(){
 		this.#updateStateDimensions();
-		ECSObject.connected.apply(this);
+		this.traverse(entity => {
+			if(entity.isEntity) entity.connected();
+		});
 	}// connected
 	disconnected(){
 		// queue pending frame
@@ -52,7 +50,9 @@ export default class World extends Scene {
 		this.removeEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
 
 		// apply any shared disconnected functionality
-		ECSObject.disconnected.apply(this);
+		this.traverse(entity => {
+			if(entity.isEntity) entity.disconnected();
+		});
 	}// disconnected
 
 	play(){
@@ -61,7 +61,9 @@ export default class World extends Scene {
 		if(canPlay){
 			if(!this.#isPlaying){
 				this.#isPlaying = true;
-				ECSObject.play.apply(this);
+				this.traverse(entity => {
+					if(entity.isEntity) entity.play();
+				});
 
 				this.#frame = requestAnimationFrame(this.#tick)
 			} else {
@@ -75,7 +77,9 @@ export default class World extends Scene {
 		if(this.#isPlaying){
 			this.#isPlaying = false;
 			cancelAnimationFrame(this.#frame);
-			ECSObject.pause.apply(this);
+			this.traverse(entity => {
+				if(entity.isEntity) entity.pause();
+			});
 		} else {
 			console.warn("[WARNING](World) You called .pause() on an world that was already paused: call to pause ignored.", this);
 		}
@@ -110,7 +114,11 @@ export default class World extends Scene {
 		// calculate the time since our last tick
 		this.#deltaTime = time - (this.#lastTickTime || time);
 		// apply tick to all entities in the scene
-		ECSObject.tick.apply(this, [ time, this.#deltaTime ]);
+		this.traverse(entity => {
+			if(entity.isEntity){
+				entity.tick(time, this.#deltaTime);
+			}
+		});
 		// render the new scene
 		this.#renderer.render(this, this.#camera);
 		// apply any calculations that need to happen AFTER the animation frame
@@ -120,7 +128,11 @@ export default class World extends Scene {
 	}// #tick
 
 	#tock = (time, deltaTime) => {
-		ECSObject.tock.apply(this, [ time, deltaTime ]);
+		this.traverse(entity => {
+			if(entity.isEntity){
+				entity.tick(time, this.#deltaTime);
+			}
+		});
 	}// #tock
 
 
@@ -163,7 +175,7 @@ export default class World extends Scene {
 		const {
 			width: newWidth,
 			height: newHeight
-		} = (this.canvas.getRootNode().host || this.canvas.parentElement).getBoundingClientRect();
+		} = (this.canvas.getRootNode().host || this.canvas.parentElement || this.canvas).getBoundingClientRect();
 
 		// if we don't have any dimensions yet, then assume something went wrong and to re-check ASAP
 		if(newWidth === 0 || newHeight === 0) requestAnimationFrame(this.#updateStateDimensions)
