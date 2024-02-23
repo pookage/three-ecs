@@ -13,57 +13,38 @@
 			}
 		</script>
 		<script type="module">
-			import { Color } from "three";
+			import { Color, AmbientLight, PerspectiveCamera, BoxGeometry, MeshBasicMaterial } from "three";
 			import { World, Entity, Camera, Geometry, Material, Mesh } from "three-ecs";
 
-			const world = window.WORLD =new World([
-				// CAMERA
-				new Entity([], [
-					new Camera()
-				], {
-					position: {
-						z: -3,
-						y: 1.5
+			// const light = new AmbientLight( 0x404040 );
+			const camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			const world = window.WORLD = new World([
+				// create a blue box
+				new Entity(
+					[], 
+					[
+						new Geometry(),
+						new Material({ color: 0xff0000 }),
+						new Mesh()
+					], 
+					{
+						position: {
+							x: -2
+						}
 					}
-				}),
-
-				// BOXES
-				// a red box to the left
-				new Entity([], [
-					new Geometry({ 
-						primitive: "box",
-						height: 0.75,
-						width:  0.75,
-						depth:  0.75
-					}),
-					new Material({
-						color: new Color(0xff0000),
-					}),
-					new Mesh()
-				], {
-					position: {
-						x: -1
+				),
+				new Entity(
+					[ camera ],
+					[],
+					{
+						position: {
+							y: 1,
+							z: 5
+						}
 					}
-				}),
-				// a blue box to the right
-				new Entity([], [
-					new Geometry({ 
-						primitive: "box",
-						height: 0.75,
-						width:  0.75,
-						depth:  0.75
-					}),
-					new Material({
-						color: new Color(0x0000ff),
-					}),
-					new Mesh()
-				], {
-					position: {
-						x: 1
-					}
-				}),
+				)
 			]);
-
+			
 			world.play();
 
 			document.body.appendChild(world.canvas);

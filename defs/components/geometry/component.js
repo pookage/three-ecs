@@ -40,8 +40,8 @@ export default class Geometry extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	constructor(){
-		super();
+	constructor(config){
+		super(config);
 
 		this.#geometry = this.#generateGeometry(this.data);
 	}// constructor

@@ -25,7 +25,7 @@ export default class Camera extends Component {
 			},
 			// (number) of degrees field-of-view the camera has
 			fov: {
-			 	default: 60
+			 	default: 75
 			},
 			// (number) of meters objects can get close to the camera before they're no-longer rendered
 			near: {
@@ -38,7 +38,7 @@ export default class Camera extends Component {
 			// (number) aspect ratio of the <canvas> that the camera will be projected onto (use Infinity if unknown)
 			aspect: {
 				type: "number",
-			 	default: Infinity // NOTE: test to see if it works without this
+			 	default: 1 // NOTE: test to see if it works without this
 			}
 		} 
 	}// schema
@@ -48,8 +48,8 @@ export default class Camera extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	constructor(){
-		super();
+	constructor(config){
+		super(config);
 
 		this.#camera = this.#createCamera(this.data, this.entity);
 	}// constructor
@@ -122,9 +122,12 @@ export default class Camera extends Component {
 
 				// generate a new camera
 				camera = new PerspectiveCamera(fov, aspect, near, far);
+				console.log({ camera, fov, aspect, near, far })
 				break;
 			}
 		}
+
+
 
 		return camera;
 	}// #createCamera

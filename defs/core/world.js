@@ -23,30 +23,6 @@ export default class World extends Scene {
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
 
-	// reactive state
-	#state = new Proxy({
-		height:      undefined,
-		width:       undefined,
-		aspectRatio: undefined
-	}, {
-		set(obj, property, value){
-			const success = Reflect.set(obj, property, value);
-
-			switch(property){
-				case "height":
-				case "width": {
-					this.#updateRendererDimensions(obj.width, obj.height);
-					break;
-				}
-				case "aspectRatio": {
-					this.#updateCameraDimensions(value);
-					break;
-				}
-			}
-			return success;
-		}
-	});
-
 
 	// INTERFACE
 	// -------------------------------------
@@ -56,9 +32,14 @@ export default class World extends Scene {
 	get dependencies() { return this.#dependencies;        }
 	get isPlaying()    { return this.#isPlaying;           }
 
+	test(){ 
+		this.#updatePrimaryCamera();
+	}
+
 	// PUBLIC METHODS
 	// ~~ lifecycle jazz ~~
 	connected(){
+		this.#updateStateDimensions();
 		ECSObject.connected.apply(this);
 	}// connected
 	disconnected(){
@@ -188,9 +169,11 @@ export default class World extends Scene {
 		if(newWidth === 0 || newHeight === 0) requestAnimationFrame(this.#updateStateDimensions)
 		else {
 			// calculate the new propteries based on the current viewport size & trigger state reactions
-			const width  = this.#state.width  = parseInt(newWidth)  * this.#samplerate;
-			const height = this.#state.height = parseInt(newHeight) * this.#samplerate;
-			this.#state.aspectRatio = width / height;
+			const width  = parseInt(newWidth)  * this.#samplerate;
+			const height = parseInt(newHeight) * this.#samplerate;
+
+			this.#updateRendererDimensions(width, height);
+			this.#updateCameraDimensions(width / height)
 		}
 	}// #updateStateDimensions
 
@@ -206,6 +189,6 @@ export default class World extends Scene {
 	}// #updateCameraDimensions
 
 	#updatePrimaryCamera = () => {
-		this.#camera = findFirstInstanceWithProperty.apply(this, "isCamera");
+		this.#camera = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
 	}// #updatePrimaryCamera
 }// World

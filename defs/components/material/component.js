@@ -32,8 +32,8 @@ export default class Material extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	constructor(){
-		super();
+	constructor(config){
+		super(config);
 
 		this.#material = this.#generateMaterial(this.data);
 	}// constructor

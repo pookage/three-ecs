@@ -77,6 +77,9 @@ export default class Component {
 	// DEFAULT LIFECYCLE JAZZ
 	// -------------------------------------
 	constructor(userConfig = {}){
+
+		console.log(userConfig)
+
 		const verifiedConfig = verifyComponentConfig.apply(this, [
 			userConfig,
 			this.constructor.schema
