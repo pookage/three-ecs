@@ -1,11 +1,11 @@
 import { Object3D, MathUtils } from "three";
 
 import ECSObject from "./ecs-object/js";
-import { componentRegistry, toProperCase } from "../utils/index.js";
+import { componentRegistry, toProperCase } from "../../utils/index.js";
 
 
 export default class Entity extends Object3D {
-	// INSTANCE PROPERTIES
+	// PRIVATE PROPERTIES
 	// -------------------------------------
 	// static state
 	#isPlaying    = false;

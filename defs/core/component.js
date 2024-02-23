@@ -1,9 +1,9 @@
-import { verifyComponentConfig, generateReactiveShallowState } from "../utils/index.js";
+import { verifyComponentConfig, generateReactiveShallowState } from "../../utils/index.js";
 
 export default class Component {
 	// INTERFACE
 	// -------------------------------------
-	// PUBLIC PROPERTIES
+	// STATIC PROPERTIES
 	static get schema()      { return {} } // the schema should be read-only and defined on the subclass
 	static get dependencies(){ return [] } // all the components that this relies on to function
 
@@ -66,8 +66,9 @@ export default class Component {
 	dependencyRemoved(component){ }// dependencyRemoved
 
 
-	// INSTANCE PROPERTIES
+	// PRIVATE PROPERTIES
 	// -------------------------------------
+	// helpers
 	#entity;
 	#data;
 

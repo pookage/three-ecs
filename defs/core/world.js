@@ -1,11 +1,12 @@
 import { Scene, WebGLRenderer } from "three";
 
 import ECSObject from "./ecs-object/js";
-import { findFirstInstanceWithProperty } from "../utils/index.js";
+import { findFirstInstanceWithProperty } from "../../utils/index.js";
+import { CAMERA_ADDED, CAMERA_REMOVED } from "../components/camera/index.js";
 
 
 export default class World extends Scene {
-	// INSTANCE PROPERTIES
+	// PRIVATE PROPERTIES
 	// -------------------------------------
 	// config
 	#samplerate; // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
@@ -59,9 +60,15 @@ export default class World extends Scene {
 		ECSObject.connected.apply(this);
 	}// connected
 	disconnected(){
-		window.removeEventListener("resize", this.#resizeHandler);
+		// queue pending frame
 		cancelAnimationFrame(this.#frame);
 
+		// clear any event listeners
+		window.removeEventListener("resize", this.#resizeHandler);
+		this.removeEventListener(CAMERA_ADDED, this.#updatePrimaryCamera);
+		this.removeEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
+
+		// apply any shared disconnected functionality
 		ECSObject.disconnected.apply(this);
 	}// disconnected
 
@@ -152,6 +159,8 @@ export default class World extends Scene {
 
 		// add event listeners
 		window.addEventListener("resize", this.#handleResize);
+		this.addEventListener(CAMERA_ADDED, this.#updatePrimaryCamera);
+		this.addEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
 	}// constructor
 
 
@@ -191,4 +200,8 @@ export default class World extends Scene {
 		this.#camera.aspect = aspectRatio;
 		this.#camera.updateProjectionMatrix();
 	}// #updateCameraDimensions
+
+	#updatePrimaryCamera = () => {
+		this.#camera = findFirstInstanceWithProperty.apply(this, "isCamera");
+	}// #updatePrimaryCamera
 }// World

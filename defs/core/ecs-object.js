@@ -92,9 +92,7 @@ const ECSObject = {
 
 		if(this.components.has(componentName)){
 			console.warn(`[WARNING] ${this.constructor.name} already has a ${componentName} instance - this will be removed and replaced with the new one`);
-
-			// call the component 'remove' lifecycle method so it can do its own cleanup
-			this.components.get(componentName).cleanup();
+			this.removeComponent(this.components.get(componentName));
 		}
 
 		// add the new component

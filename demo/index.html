@@ -7,23 +7,82 @@
 				"imports": {
 					"three":           "https://unpkg.com/three@0.157.0/build/three.module.min.js",
 					"three/addons/":   "https://unpkg.com/three@0.157.0/examples/jsm/",
-					"three-ecs":       "./../index.js",
-					"three-ecs/":      "./../"
+					"three-ecs":       "../index.js",
+					"three-ecs/":      "../"
 				}
 			}
 		</script>
 		<script type="module">
-			import { World, Camera } from "three-ecs";
+			import { Color } from "three";
+			import { World, Entity, Camera } from "three-ecs";
 
 			const world = new World([
+				// CAMERA
 				new Entity([], [
 					new Camera()
-				])
+				], {
+					position: {
+						z: 3,
+						y: 1.5
+					},
+					rotation: {
+						x: -20
+					}
+				}),
+
+				// BOXES
+				// a red box to the left
+				new Entity([], [
+					new Geometry({ 
+						primitive: "box",
+						height: 0.75,
+						width:  0.75,
+						depth:  0.75
+					}),
+					new Material({
+						color: new Color(0xff0000),
+					}),
+					new Mesh()
+				], {
+					position: {
+						x: -1
+					}
+				}),
+				// a blue box to the right
+				new Entity([], [
+					new Geometry({ 
+						primitive: "box",
+						height: 0.75,
+						width:  0.75,
+						depth:  0.75
+					}),
+					new Material({
+						color: new Color(0x0000ff),
+					}),
+					new Mesh()
+				], {
+					position: {
+						x: 1
+					}
+				}),
 			]);
-			// world.play();
+
+			world.play();
 
 			document.body.appendChild(world.canvas);
 		</script>
+		<style>
+			* {
+				box-sizing: border-box;;
+			}
+			html, body, canvas {
+				height: 100%;
+				width: 100%;
+			}
+			body {
+				margin: 0;
+			}
+		</style>
 	</head>
 	<body>
 
