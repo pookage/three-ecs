@@ -56,7 +56,7 @@ export default class Entity extends Object3D {
 		if(!this.#isPlaying){
 			this.#isPlaying = true;
 			// fire play() lifecycle callback on all attached components
-			for(const component of entity.components.values()){
+			for(const component of this.components.values()){
 				component.play();
 			}
 		} else {
@@ -67,7 +67,7 @@ export default class Entity extends Object3D {
 		if(this.#isPlaying){
 			this.#isPlaying = false;
 			// fire pause() lifecycle callback on all attached components
-			for(const component of entity.components.values()){
+			for(const component of this.components.values()){
 				component.pause();
 			}
 		} else {

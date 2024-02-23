@@ -32,13 +32,18 @@ export default class Material extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
+	constructor(){
+		super();
+
+		this.#material = this.#generateMaterial(this.data);
+	}// constructor
 	update(property, previous, current){
 		super.update(property, previous, current);
 
 		if(previous !== current){
 			switch(property){
 				case "type": {
-					this.#generateMaterial(this.data);
+					this.#material = this.#generateMaterial(this.data);
 					break;
 				}
 				case "color": {
@@ -58,15 +63,18 @@ export default class Material extends Component {
 			type
 		} = data;
 
+		let material;
 		switch(type){
 			case "basic": {
-				this.#material = new MeshBasicMaterial({ color })
+				material = new MeshBasicMaterial({ color })
 				break;
 			}
 			default: {
 				console.error("[ERROR](Material) Cannot create material of unknown type:", type)
 			}
 		}
+
+		return material;
 	}// #generateMaterial
 
 	#updateMaterial = (material, property, value) => {

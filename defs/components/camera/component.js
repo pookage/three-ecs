@@ -48,6 +48,11 @@ export default class Camera extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
+	constructor(){
+		super();
+
+		this.#camera = this.#createCamera(this.data, this.entity);
+	}// constructor
 	connected(entity){
 		super.connected(entity);
 

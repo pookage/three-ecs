@@ -25,7 +25,7 @@ export default class Component {
 	play(){}// #play
 	pause(){}// #pause
 
-	connected = entity => {
+	connected(entity){
 		// let any dependencies know that this component has been added
 		if(entity.dependencies.has(this.constructor.name)){
 			for(const dependency of entity.dependencies.get(this.constructor.name)){
@@ -36,7 +36,7 @@ export default class Component {
 			}
 		}
 	}// connected
-	disconnected = entity => {
+	disconnected(entity){
 		// let any dependencies know that this component has been removed
 		if(entity.dependencies.has(this.constructor.name)){
 			for(const dependency of entity.dependencies.get(this.constructor.name)){
@@ -47,7 +47,7 @@ export default class Component {
 		}
 	}// disconnected
 
-	update = (property, previous, current) => {
+	update(property, previous, current){
 		// let any dependencies know that a change has occurred
 		if(previous !== current && this.#entity.dependencies.has(this.constructor.name)){
 			for(const dependency of this.#entity.dependencies.get(this.constructor.name)){

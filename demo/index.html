@@ -16,17 +16,14 @@
 			import { Color } from "three";
 			import { World, Entity, Camera, Geometry, Material, Mesh } from "three-ecs";
 
-			const world = new World([
+			const world = window.WORLD =new World([
 				// CAMERA
 				new Entity([], [
 					new Camera()
 				], {
 					position: {
-						z: 3,
+						z: -3,
 						y: 1.5
-					},
-					rotation: {
-						x: -20
 					}
 				}),
 

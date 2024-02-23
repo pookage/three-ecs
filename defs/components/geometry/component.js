@@ -40,9 +40,14 @@ export default class Geometry extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
+	constructor(){
+		super();
+
+		this.#geometry = this.#generateGeometry(this.data);
+	}// constructor
 	update(property, previous, current){
 		if(previous !== current){
-			this.#updateGeometry(this.data);	
+			this.#geometry = this.#generateGeometry(this.data);	
 		}
 
 		super.update(property, previous, current);
@@ -51,7 +56,9 @@ export default class Geometry extends Component {
 
 	// UTILS
 	// -------------------------------------
-	#updateGeometry = (data) => {
+	#generateGeometry = (data) => {
+		let geometry;
+
 		switch(data.primitive){
 			case "box": {
 				const {
@@ -60,7 +67,7 @@ export default class Geometry extends Component {
 					depth
 				} = data;
 
-				this.#geometry = new BoxGeometry(width, height, depth);
+				geometry = new BoxGeometry(width, height, depth);
 				break;
 			}
 			case "sphere": {
@@ -68,9 +75,11 @@ export default class Geometry extends Component {
 					radius 
 				} = data;
 
-				this.#geometry = new SphereGeometry(radius);
+				geometry = new SphereGeometry(radius);
 				break;
 			}
 		}
-	}// #updateGeometry
+
+		return geometry;
+	}// #generateGeometry
 }// Geometry
