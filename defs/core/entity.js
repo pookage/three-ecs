@@ -96,6 +96,7 @@ export default class Entity extends Object3D {
 		ECSObject.remove.apply(this, [ entity ]); 
 	} // remove
 
+	// ~~ utils ~~
 	addComponent(component){
 		ECSObject.addComponent.apply(this, [ component ])
 	}// addComponent
@@ -106,6 +107,11 @@ export default class Entity extends Object3D {
 	dispatchEvent(event, ...otherArgs){
 		ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]);
 	}// dispatchEvent
+
+	applyProperty(key, value){
+		return this.#applyProperty(key, value);
+	}// applyProperty
+
 
 
 	// DEFAULT LIFECYCLE JAZZ
