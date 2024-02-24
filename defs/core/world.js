@@ -26,6 +26,9 @@ export default class World extends Scene {
 
 	// INTERFACE
 	// -------------------------------------
+	// STATIC PROPERTIES
+	static get mappings(){ return {}; }
+	
 	// PUBLIC PROPERTIES
 	get canvas()       { return this.#renderer.domElement; }
 	get components()   { return this.#components;          }
