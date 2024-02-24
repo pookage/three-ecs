@@ -9,8 +9,12 @@ import Geometry from "./defs/components/geometry/index.js";
 import Material from "./defs/components/material/index.js";
 import Mesh from "./defs/components/mesh/index.js";
 
+// useful utils for other libraries
+import { parseUnverifiedConfig } from "./utils/index.js";
+
 export { 
 	World, Entity, Component, 
 	Camera,
-	Geometry, Material, Mesh
-}
+	Geometry, Material, Mesh,
+	parseUnverifiedConfig
+};

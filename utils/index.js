@@ -15,7 +15,7 @@ export function findFirstInstanceWithProperty(property){
 	return instance;
 }// findFirstInstanceWithProperty
 
-export function verifyComponentConfig(userConfig, schema){
+export function parseUnverifiedConfig(userConfig, schema){
 	return Object.entries(schema).reduce(
 		(config, [ property, valueSchema ]) => {
 			const {
@@ -66,7 +66,7 @@ export function verifyComponentConfig(userConfig, schema){
 		},
 		{}
 	);
-}// verifyComponentConfig
+}// parseUnverifiedConfig
 
 export function verifyType(value, type){
 	switch(type){

@@ -1,4 +1,4 @@
-import { verifyComponentConfig, generateReactiveShallowState } from "../../utils/index.js";
+import { parseUnverifiedConfig, generateReactiveShallowState } from "../../utils/index.js";
 
 export default class Component {
 	// INTERFACE
@@ -77,7 +77,7 @@ export default class Component {
 	// DEFAULT LIFECYCLE JAZZ
 	// -------------------------------------
 	constructor(userConfig = {}){
-		const verifiedConfig = verifyComponentConfig.apply(this, [
+		const verifiedConfig = parseUnverifiedConfig.apply(this, [
 			userConfig,
 			this.constructor.schema
 		]);
