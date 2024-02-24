@@ -57,11 +57,21 @@ export default class Camera extends Component {
 		super.connected(entity);
 
 		entity.add(this.#camera);
+		entity.dispatchEvent({ 
+			type: CAMERA_ADDED,
+			bubbles: true,
+			camera: this.#camera
+		});
 	}// connected
 	disconnected(entity){
 		super.disconnected(entity);
 
 		entity.remove(this.#camera);
+		entity.dispatchEvent({ 
+			type: CAMERA_REMOVED,
+			bubbles: true,
+			camera: this.#camera
+		});
 	}// disconnected
 
 	update(property, previous, current){
