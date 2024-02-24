@@ -48,9 +48,6 @@ export default class Component {
 	}// disconnected
 
 	update(property, previous, current){
-
-		console.log(property, "changed from", previous, "to", current)
-
 		// let any dependencies know that a change has occurred
 		if(previous !== current && this.#entity.dependencies.has(this.constructor.name)){
 			for(const dependency of this.#entity.dependencies.get(this.constructor.name)){

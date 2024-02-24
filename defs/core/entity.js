@@ -1,7 +1,7 @@
 import { Object3D, MathUtils } from "three";
 
 import ECSObject from "./ecs-object.js";
-import { componentRegistry, toProperCase, parseAsThreeValue } from "../../utils/index.js";
+import { componentRegistry, toProperCase, parseAsThreeProperty } from "../../utils/index.js";
 
 
 export default class Entity extends Object3D {
@@ -140,7 +140,7 @@ export default class Entity extends Object3D {
 	// -------------------------------------
 	#applyProperty = (key, rawValue) => {
 		const [ name, property ] = this.constructor.mappings[key]?.split(".");
-		const value              = parseAsThreeValue(rawValue, property);
+		const value              = parseAsThreeProperty(rawValue, property);
 
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
 		if(name !== "entity") this.#components.get(toProperCase(name)).data[property] = value;
