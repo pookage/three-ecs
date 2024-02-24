@@ -1,7 +1,7 @@
 import { Object3D, MathUtils } from "three";
 
 import ECSObject from "./ecs-object.js";
-import { componentRegistry, toProperCase } from "../../utils/index.js";
+import { componentRegistry, toProperCase, parseAsThreeValue } from "../../utils/index.js";
 
 
 export default class Entity extends Object3D {
@@ -138,8 +138,9 @@ export default class Entity extends Object3D {
 
 	// UTILS
 	// -------------------------------------
-	#applyProperty = (key, value) => {
+	#applyProperty = (key, rawValue) => {
 		const [ name, property ] = this.constructor.mappings[key]?.split(".");
+		const value              = parseAsThreeValue(rawValue, property);
 
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
 		if(name !== "entity") this.#components.get(toProperCase(name)).data[property] = value;
@@ -148,62 +149,21 @@ export default class Entity extends Object3D {
 		else {
 			switch(property){
 				case "position": {
-					// receive this property as an {xyz} object, but set it using the threejs Vector3 methods
-					const { 
-						x = 0, 
-						y = 0, 
-						z = 0
-					} = value;
-
-					this.position.set(
-						parseFloat(x), 
-						parseFloat(y), 
-						parseFloat(z)
-					);
+					this.position.copy(value);
 					break;
 				}
 				case "rotation": {
-					// receive this property as an {xyz} object in degrees, and apply using the threejs Euler method in radians
-					const { 
-						x = 0, 
-						y = 0, 
-						z = 0 
-					} = value;
-
-					this.rotation.set(
-						MathUtils.degToRad(x), 
-						MathUtils.degToRad(y), 
-						MathUtils.degToRad(z)
-					);
+					this.rotation.copy(value);
 					break;
 				}
 				case "scale": {
-					const { x, y, z } = isObject(value) 
-						// if we have an object, use its xyz properties and default to 1 for anything undefined
-						? {
-							x: value.x ?? 1,
-							y: value.y ?? 1,
-							z: value.z ?? 1
-						} 
-						// if we have a single value, apply it equally to all axis
-						: {
-							x: value,
-							y: value,
-							z: value
-						};
-					this.scale.set(
-						parseFloat(x),
-						parseFloat(y),
-						parseFloat(z)
-					);
+					this.scale.copy(value);
 					break;
 				}
-
 				case "visible": {
 					this.visible = value;
 					break;
 				}
-
 				// otherwise don't treat this property with any special case
 				default: this[key] = value;
 			}

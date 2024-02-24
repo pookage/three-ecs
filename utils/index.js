@@ -1,4 +1,4 @@
-import { Color, MathUtils } from "three";
+import { Color, MathUtils, Vector3, Euler } from "three";
 
 
 export const componentRegistry = new Map();
@@ -150,3 +150,46 @@ function parseValueWithSchema(value, type, schema){
 		default       : return new String(value).toString();
 	}
 }// parseValueWithSchema
+
+function parseStringAsThreeValue(value, type){
+	switch(type){
+		case "position":
+		case "rotation":
+		case "scale": {
+			const [ x, y, z ] = value.split(" ");
+			return new Vector3(
+				parseFloat(x),
+				parseFloat(y),
+				parseFloat(z)
+			);
+		}
+		case "visible": return value !== "false";
+		case "color":   return new Color(value);
+	}
+}// parseStringAsThreeValue
+
+function parseObjectAsThreeValue(value, type){
+	switch(type){
+		case "position": return new Vector3(
+			parseFloat(value.x ?? 0), 
+			parseFloat(value.y ?? 0), 
+			parseFloat(value.z ?? 0)
+		);
+		case "rotation": return new Euler(
+			MathUtils.degToRad(value.x ?? 0),
+			MathUtils.degToRad(value.y ?? 0),
+			MathUtils.degToRad(value.z ?? 0)
+		);
+		case "scale": return new Vector3(
+			parseFloat(value.x ?? 1),
+			parseFloat(value.y ?? 1),
+			parseFloat(value.z ?? 1)
+		);
+		default: return rawValue;
+	}
+}// parseObjectAsThreeValue
+
+export function parseAsThreeValue(value, type){
+	if(typeof value === "string") return parseStringAsThreeValue(value, type);
+	else if(isObject(value))      return parseObjectAsThreeValue(rawValue, type);
+}// parseAsThreeValue
