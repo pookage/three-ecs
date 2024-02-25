@@ -1,6 +1,6 @@
 import { Mesh as THREEMesh } from "three";
 
-import Component from "../../core/component.js";
+import Component from "../../core/component/index.js";
 
 
 export default class Mesh extends Component {

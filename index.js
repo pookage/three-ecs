@@ -1,7 +1,8 @@
 // core definitions
 import World from "./defs/core/world.js";
 import Entity from "./defs/core/entity.js";
-import Component from "./defs/core/component.js";
+import Component from "./defs/core/component/index.js";
+import System from "./defs/core/system.js";
 
 // component definitions
 import Camera from "./defs/components/camera/index.js";
@@ -13,7 +14,7 @@ import Mesh from "./defs/components/mesh/index.js";
 import { parseUnverifiedConfig, componentRegistry } from "./utils/index.js";
 
 export { 
-	World, Entity, Component, 
+	World, Entity, Component, System,
 	Camera,
 	Geometry, Material, Mesh,
 	componentRegistry,

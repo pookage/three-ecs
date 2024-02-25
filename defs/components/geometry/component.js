@@ -1,6 +1,6 @@
 import { BoxGeometry, SphereGeometry } from "three";
 
-import Component from "../../core/component.js";
+import Component from "../../core/component/index.js";
 
 
 export default class Geometry extends Component {

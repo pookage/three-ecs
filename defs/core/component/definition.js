@@ -1,4 +1,6 @@
-import { parseUnverifiedConfig, generateReactiveShallowState } from "../../utils/index.js";
+import { parseUnverifiedConfig, generateReactiveShallowState } from "../../../utils/index.js";
+
+import { CONNECTED, DISCONNECTED } from "./events.js";
 
 export default class Component {
 	// INTERFACE
@@ -35,6 +37,19 @@ export default class Component {
 				);
 			}
 		}
+
+		// broadcast a wider connection event for anything else to hook onto
+		this.entity.dispatchEvent(
+			new CustomEvent(
+				CONNECTED,
+				{
+					bubbles: true,
+					detail: {
+						component: this
+					}
+				}
+			)
+		);
 	}// connected
 	disconnected(entity){
 		// let any dependencies know that this component has been removed
@@ -45,6 +60,19 @@ export default class Component {
 				);
 			}
 		}
+
+		// broadcast a wider connection event for anything else to hook onto
+		this.entity.dispatchEvent(
+			new CustomEvent(
+				DISCONNECTED,
+				{
+					bubbles: true,
+					detail: {
+						component: this
+					}
+				}
+			)
+		);
 	}// disconnected
 
 	update(property, previous, current){

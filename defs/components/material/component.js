@@ -1,6 +1,6 @@
 import { MeshBasicMaterial, Color } from "three";
 
-import Component from "../../core/component.js";
+import Component from "../../core/component/index.js";
 
 
 export default class Material extends Component {

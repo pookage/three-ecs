@@ -116,7 +116,12 @@ export default class Entity extends Object3D {
 
 	// DEFAULT LIFECYCLE JAZZ
 	// -------------------------------------
-	constructor(children = [], initialComponents = [], properties = {}){
+	constructor(
+		children = [], 
+		initialComponents = [],
+		initialSystems = [],
+		properties = {}
+	){
 		super();
 
 		// define all the components to be attached to this entity

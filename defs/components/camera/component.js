@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from "three";
 
-import Component from "../../core/component.js";
+import Component from "../../core/component/index.js";
 
 import { CAMERA_ADDED, CAMERA_REMOVED } from "./events.js";
 
