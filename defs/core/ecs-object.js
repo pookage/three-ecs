@@ -8,11 +8,16 @@ let sys;
 const ECSObject = {
 	// LIFECYCLE JAZZ
 	// -------------------------------------
-	init(children = [], systems = [], components = [], properties = {}){
-		// adopt children
-		for(const child of children) this.add(child);
+	init(
+		children   = [], 
+		systems    = [], 
+		components = [], 
+		properties = {}
+	){
 		// adopt systems
 		for(const system of systems) this.addSystem(system);
+		// adopt children
+		for(const child of children) this.add(child);
 		// adopt components
 		for(const component of components) this.addComponent(component);
 	},//init
@@ -67,7 +72,8 @@ const ECSObject = {
 	// -------------------------------------
 	add(entity){
 		if(entity.isEntity){
-			entity.added();
+			// fire lifecycle methods as applicable
+			if(this.isAdded)     entity.added();
 			if(this.isConnected) entity.connected();
 			if(this.isPlaying)   entity.play();
 		}
@@ -131,7 +137,7 @@ const ECSObject = {
 		this.systems.delete(systemName);
 	},
 
-	addComponent(component){
+	addComponent(component, isParentAdded){
 		const componentName = component.constructor.name;
 
 		if(this.components.has(componentName)){
@@ -144,7 +150,7 @@ const ECSObject = {
 		component.entity = this;
 
 		// call the appropriate component lifecycle methods if it's been added after the entity has been connected
-		component.added(this);
+		if(this.isAdded)     component.added(this);
 		if(this.isConnected) component.connected(this);
 		if(this.isPlaying)   component.play();
 

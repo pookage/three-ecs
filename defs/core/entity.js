@@ -11,8 +11,9 @@ export default class Entity extends Object3D {
 	#component;
 	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 	// static state
-	#isPlaying    = false;
+	#isAdded      = false;
 	#isConnected  = false;
+	#isPlaying    = false;
 	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
@@ -41,8 +42,9 @@ export default class Entity extends Object3D {
 	get systems()      { return this.#systems;      }
 	get components()   { return this.#components;   }
 	get dependencies() { return this.#dependencies; }
-	get isPlaying()    { return this.#isPlaying;    }
+	get isAdded()      { return this.#isAdded;      }
 	get isConnected()  { return this.#isConnected;  }
+	get isPlaying()    { return this.#isPlaying;    }
 	get isEntity()     { return true; }
 
 	// ~~ setters ~~
@@ -80,8 +82,24 @@ export default class Entity extends Object3D {
 		}
 	}// constructor
 
-	added()  { }// added
-	removed(){ }// remoevd
+	added()  { 
+		// fire added lifecycle callback on all attached systems
+		for(const system of this.systems.values()) system.added(this);
+		// fire added lifecycle callback on all attached components
+		for(const component of this.components.values()) component.added(this);
+
+		// flip the flag to mark this entity as added
+		this.#isAdded = true; 
+	}// added
+	removed(){ 
+		// fire removed lifecycle callback on all attached systems
+		for(const system of this.systems.values()) system.removed(this);
+		// fire removed lifecycle callback on all attached components
+		for(const component of this.components.values()) component.removed(this);
+
+		// flip the flag to mark this entity as removed
+		this.#isAdded = false; 
+	}// remoevd
 
 	connected()   { ECSObject.connected.apply(this);    }// connected
 	disconnected(){ ECSObject.disconnected.apply(this); }// disconnected
@@ -118,8 +136,8 @@ export default class Entity extends Object3D {
 		ECSObject.add.apply(this, [ entity ]); 
 	}// add
 	remove(entity){ 
-		super.remove(entity);
 		ECSObject.remove.apply(this, [ entity ]); 
+		super.remove(entity);
 	} // remove
 
 	// ~~ utils ~~

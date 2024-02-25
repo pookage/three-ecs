@@ -19,87 +19,119 @@
 				componentRegistry, systemRegistry
 			} from "three-ecs";
 
-			// CUSTOM SYSTEMS
-			// ---------------------------------------------
-			class NoisySystem extends System {
-				static get autoregister(){
-					return [
-						"noisy-component"
-					]
-				}// get autoregister
-
-				connected(entity){
-					super.connected(entity);
-
-					console.log("Noisy system added!");
-				}// connected
-			}// NoisySystem
-
-			systemRegistry.set("noisy-system", NoisySystem);
-
 
 			// CUSTOM COMPONENTS
 			// ---------------------------------------------
 			class NoisyComponent extends Component {
-				connected(entity){
-					super.connected(entity);
+				added(entity){
+					super.added(entity);
+
+					entity.addEventListener("SYSTEM__NOISY_SYSTEM__UPDATE", this.#handleNoisySystemUpdate);
 
 					console.log("Noisy component added!");
-				}// connected
+				}// added
+
+				#handleNoisySystemUpdate = event => {
+					console.log("The noisy system told me to say something!");
+				}// #handleNoisySystemUpdate
 			}// NoisyComponent
 
 			componentRegistry.set("noisy-component", NoisyComponent);
 
 
+			// CUSTOM SYSTEMS
+			// ---------------------------------------------
+			class NoisySystem extends System {
+				#interval;
+
+				static get autoregister(){
+					return [
+						NoisyComponent.name
+					]
+				}// get autoregister
+
+				constructor(){
+					super();
+
+					this.#interval = setInterval(this.update.bind(this), 1000);
+				}// constructor
+
+				added(entity){
+					super.added(entity);
+
+					console.log("Noisy system added!");
+				}// added
+				removed(entity){
+					super.removed(entity);
+
+					clearInterval(this.#interval);
+				}// removed
+
+				update(){
+					for(const component of this.registeredComponents.values()){
+						component.entity.dispatchEvent({
+							type: "SYSTEM__NOISY_SYSTEM__UPDATE"
+						});
+					}
+				}// update
+			}// NoisySystem
+
+			systemRegistry.set("noisy-system", NoisySystem);
+
+
 			// BUILD-OUT SCENE
 			// ---------------------------------------------
-			const world = window.WORLD = new World([
-				// create a red box to the left
-				new Entity(
-					[], 
-					[],
-					[
-						new Geometry(),
-						new Material({ color: 0xff0000 }),
-						new Mesh()
-					],
-					{
-						position: {
-							x: -2
+			const world = window.WORLD = new World(
+				[
+					// create a red box to the left
+					new Entity(
+						[], 
+						[],
+						[
+							new Geometry(),
+							new Material({ color: 0xff0000 }),
+							new Mesh()
+						],
+						{
+							position: {
+								x: -2
+							}
 						}
-					}
-				),
-				// create a blue box to the right
-				new Entity(
-					[], 
-					[],
-					[
-						new Geometry(),
-						new Material({ color: 0x0000ff }),
-						new Mesh()
-					], 
-					{
-						position: {
-							x: 2
+					),
+					// create a blue box to the right
+					new Entity(
+						[], 
+						[],
+						[
+							new Geometry(),
+							new Material({ color: 0x0000ff }),
+							new Mesh()
+						], 
+						{
+							position: {
+								x: 2
+							}
 						}
-					}
-				),
-				new Entity(
-					[ ],
-					[],
-					[ 
-						new Camera()
-					],
-					{
-						position: {
-							y: 1,
-							z: 5
+					),
+					new Entity(
+						[],
+						[],
+						[ 
+							new Camera(),
+							new NoisyComponent()
+						],
+						{
+							position: {
+								y: 1,
+								z: 5
+							}
 						}
-					}
-				)
-			], [
-				new NoisySystem()
-			]);
+					)
+				],
+				[
+					new NoisySystem()
+				], 
+			);
 			
 			document.body.appendChild(world.canvas);
 

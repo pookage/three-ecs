@@ -40,13 +40,19 @@ export default class World extends Scene {
 	get dependencies() { return this.#dependencies;        }
 	get isPlaying()    { return this.#isPlaying;           }
 	get isConnected()  { return this.#isConnected;         }
+	get isAdded()      { return true;                      }
 
 	// ~~ setters ~~
 	set isConnected(isConnected){ this.#isConnected = isConnected; }
 
 	// PUBLIC METHODS
 	// ~~ lifecycle jazz ~~
-	constructor(children = [], systems = [], components = [], properties = {}){
+	constructor(
+		children   = [], 
+		systems    = [], 
+		components = [], 
+		properties = {}
+	){
 		super();
 
 		ECSObject.init.apply(this, [ children, systems, components, properties ]);
@@ -133,8 +139,8 @@ export default class World extends Scene {
 		ECSObject.add.apply(this, [ entity ]);
 	}// add
 	remove(entity){
-		super.remove(entity);
 		ECSObject.remove.apply(this, [ entity ]);
+		super.remove(entity);
 	}// remove
 
 	addSystem(system){

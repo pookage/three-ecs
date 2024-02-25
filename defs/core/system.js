@@ -86,10 +86,10 @@ export default class System {
 	// EVENT HANDLERS
 	// -------------------------------------
 	#autoRegisterComponent = event => {
-		const { component } = event.detail;
+		const { component } = event;
 
 		const shouldAutoRegisterComponent = this.constructor.autoregister.includes(component.constructor.name);
-		
+
 		if(shouldAutoRegisterComponent){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
 			this.#register(component);
@@ -97,7 +97,7 @@ export default class System {
 	}// #autoRegisterComponent
 
 	#autoUnregisterComponent = event => {
-		const { component } = event.detail;
+		const { component } = event;
 		const shouldAutoRegisterComponent = this.constructor.autoregister.includes(component.constructor.name);
 
 		if(shouldAutoRegisterComponent){

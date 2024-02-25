@@ -40,7 +40,7 @@ export default class Component {
 		}
 
 		// broadcast a wider connection event for anything else to hook onto
-		this.entity.dispatchEvent({
+		entity.dispatchEvent({
 			type: ADDED,
 			bubbles: true,
 			component: this
@@ -57,7 +57,7 @@ export default class Component {
 		}
 
 		// broadcast a wider connection event for anything else to hook onto
-		this.entity.dispatchEvent({
+		entity.dispatchEvent({
 			type: REMOVED,
 			bubbles: true,
 			component: this
