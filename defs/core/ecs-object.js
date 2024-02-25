@@ -27,6 +27,9 @@ const ECSObject = {
 		for(const component of this.components.values()) component.connected(this);
 	},// connected
 	disconnected(){
+		// mark this entity as disconnected
+		this.isConnected = false;
+
 		// fire disconnected lifecycle callback on all attached systems
 		for(const system of this.systems.values()) system.disconnected(this);
 		// fire disconnected lifecycle callback on all attached components
@@ -72,7 +75,7 @@ const ECSObject = {
 	remove(entity){
 		if(entity.isEntity){
 			entity.removed();
-			entity.disconnected();
+			if(this.isConnected) entity.disconnected();
 		}
 	},// remove
 
@@ -122,8 +125,8 @@ const ECSObject = {
 		const systemName = system.constructor.name;
 
 		// call the appropriate system
-		system.removed();
-		system.disconnected(this);
+		system.removed(this);
+		if(this.isConnected) system.disconnected(this);
 		// remove the system from this entity
 		this.systems.delete(systemName);
 	},
@@ -164,8 +167,8 @@ const ECSObject = {
 		}
 
 		// call the appropriate component lifecycle methods
-		component.removed();
-		component.disconnected(this);
+		component.removed(this);
+		if(this.isConnected) component.disconnected(this);
 		// remove the component from this entity
 		this.components.delete(componentName);
 	}// removeComponent
