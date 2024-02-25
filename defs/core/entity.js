@@ -36,6 +36,7 @@ export default class Entity extends Object3D {
 	}// get defaultComponents
 
 	// PUBLIC PROPERTIES
+	get systems()      { return this.#systems;      }
 	get components()   { return this.#components;   }
 	get dependencies() { return this.#dependencies; }
 	get isPlaying()    { return this.#isPlaying;    }

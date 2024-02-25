@@ -25,6 +25,8 @@ export default class System {
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
 	connected(entity){
+		console.log({ entity })
+
 		entity.addEventListener(COMPONENT_CONNECTED, this.#autoRegisterComponent);
 		entity.addEventListener(COMPONENT_DISCONNECTED, this.#autoUnregisterComponent);
 	} // connected

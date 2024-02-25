@@ -1,5 +1,7 @@
 import { Color, MathUtils, Vector3, Euler } from "three";
 
+import EntityEventDispatcher from "./entity-event-dispatcher.js";
+
 
 const defaultPosition = { x: 0, y: 0, z: 0 };
 const defaultRotation = { x: 0, y: 0, z: 0 };
@@ -8,6 +10,86 @@ const defaultScale    = { x: 1, y: 1, z: 1 };
 const defaultPositionSchema = { default: defaultPosition };
 const defaultRotationSchema = { default: defaultRotation };
 const defaultScaleSchema    = { default: defaultScale    };
+
+function getSchemaPropertyType(property, value){
+	const { 
+		type: valueType, 
+		default: defaultValue,
+		oneOf = [] 
+	} = value;
+
+	let type;
+
+	if(valueType)                       type = valueType;
+	else if(defaultValue !== undefined) type = typeof defaultValue;
+	else if(oneOf.length > 0)           type = typeof oneOf[0];
+	else {
+		console.warn(
+			`[WARNING](${this.constructor.name}) Unable to derive type of ${property}`, 
+			value, 
+			"Please confirm that the schema for this component is correct."
+		);
+	}
+
+	return type;
+}// getSchemaPropertyType
+
+function parseValueWithSchema(value, type, schema = {}){
+	switch(type){
+		case "number": {
+			const parsedValue = parseFloat(value);
+			const {
+				min = parsedValue,
+				max = parsedValue
+			} = schema;
+
+			return MathUtils.clamp(parsedValue, min, max);
+		}
+		case "boolean": return (/true/).test(value);
+		case "color"  : return new Color(value);
+		case "vector3": return new Vector3(
+			parseFloat(value.x ?? schema.default.x), 
+			parseFloat(value.y ?? schema.default.y), 
+			parseFloat(value.z ?? schema.default.z)
+		);
+		case "euler"  : return new Euler(
+			MathUtils.degToRad(parseFloat(value.x ?? schema.default.x)),
+			MathUtils.degToRad(parseFloat(value.y ?? schema.default.y)),
+			MathUtils.degToRad(parseFloat(value.z ?? schema.default.z))
+		);
+		default: return new String(value).toString();
+	}
+}// parseValueWithSchema
+
+function parseStringAsThreeProperty(value, property){
+	switch(property){
+		case "position": {
+			const [ x, y, z ] = value.split(" ");
+			return parseValueWithSchema({ x, y, z }, "vector3", defaultPositionSchema);
+		}
+		case "rotation": {
+			const [ x, y, z ] = value.split(" ");
+			return parseValueWithSchema({ x, y, z }, "euler", defaultRotationSchema);
+		}
+		case "scale": {
+			const [ x, y, z ] = value.split(" ");
+			return parseValueWithSchema({ x, y, z }, "vector3", defaultScaleSchema);
+		}
+		case "visible": return parseValueWithSchema(value, "boolean");
+		case "color":   return parseValueWithSchema(value, "color");
+		default:        return value;
+	}
+}// parseStringAsThreeProperty
+
+function parseObjectAsThreeProperty(value, property){
+	switch(property){
+		case "position": return parseValueWithSchema(value, "vector3", defaultPositionSchema);
+		case "rotation": return parseValueWithSchema(value, "euler",   defaultRotationSchema);
+		case "scale":    return parseValueWithSchema(value, "vector3", defaultScaleSchema);
+		default:         return value;
+	}
+}// parseObjectAsThreeProperty
+
 
 export const systemRegistry    = new Map();
 export const componentRegistry = new Map();
@@ -119,87 +201,10 @@ export function toProperCase(text){
 	           .replace (/[-_]+(.)/g, (_, c) => c.toUpperCase()) // First char after each -/_	
 }// toProperCase
 
-function getSchemaPropertyType(property, value){
-	const { 
-		type: valueType, 
-		default: defaultValue,
-		oneOf = [] 
-	} = value;
-
-	let type;
-
-	if(valueType)                       type = valueType;
-	else if(defaultValue !== undefined) type = typeof defaultValue;
-	else if(oneOf.length > 0)           type = typeof oneOf[0];
-	else {
-		console.warn(
-			`[WARNING](${this.constructor.name}) Unable to derive type of ${property}`, 
-			value, 
-			"Please confirm that the schema for this component is correct."
-		);
-	}
-
-	return type;
-}// getSchemaPropertyType
-
-function parseValueWithSchema(value, type, schema = {}){
-	switch(type){
-		case "number": {
-			const parsedValue = parseFloat(value);
-			const {
-				min = parsedValue,
-				max = parsedValue
-			} = schema;
-
-			return MathUtils.clamp(parsedValue, min, max);
-		}
-		case "boolean": return (/true/).test(value);
-		case "color"  : return new Color(value);
-		case "vector3": return new Vector3(
-			parseFloat(value.x ?? schema.default.x), 
-			parseFloat(value.y ?? schema.default.y), 
-			parseFloat(value.z ?? schema.default.z)
-		);
-		case "euler"  : return new Euler(
-			MathUtils.degToRad(parseFloat(value.x ?? schema.default.x)),
-			MathUtils.degToRad(parseFloat(value.y ?? schema.default.y)),
-			MathUtils.degToRad(parseFloat(value.z ?? schema.default.z))
-		);
-		default: return new String(value).toString();
-	}
-}// parseValueWithSchema
-
-function parseStringAsThreeProperty(value, property){
-	switch(property){
-		case "position": {
-			const [ x, y, z ] = value.split(" ");
-			return parseValueWithSchema({ x, y, z }, "vector3", defaultPositionSchema);
-		}
-		case "rotation": {
-			const [ x, y, z ] = value.split(" ");
-			return parseValueWithSchema({ x, y, z }, "euler", defaultRotationSchema);
-		}
-		case "scale": {
-			const [ x, y, z ] = value.split(" ");
-			return parseValueWithSchema({ x, y, z }, "vector3", defaultScaleSchema);
-		}
-		case "visible": return parseValueWithSchema(value, "boolean");
-		case "color":   return parseValueWithSchema(value, "color");
-		default:        return value;
-	}
-}// parseStringAsThreeProperty
-
-function parseObjectAsThreeProperty(value, property){
-	switch(property){
-		case "position": return parseValueWithSchema(value, "vector3", defaultPositionSchema);
-		case "rotation": return parseValueWithSchema(value, "euler",   defaultRotationSchema);
-		case "scale":    return parseValueWithSchema(value, "vector3", defaultScaleSchema);
-		default:         return value;
-	}
-}// parseObjectAsThreeProperty
-
 export function parseAsThreeProperty(value, property){
 	if(typeof value === "string") return parseStringAsThreeProperty(value, property);
 	else if(isObject(value))      return parseObjectAsThreeProperty(value, property);
 	else                          return value;
 }// parseAsThreeProperty
+
+export { EntityEventDispatcher }

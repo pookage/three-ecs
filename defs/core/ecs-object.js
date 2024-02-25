@@ -1,6 +1,8 @@
-import { EventDispatcher } from "three";
+import { EntityEventDispatcher } from "../../utils/index.js";
+
 
 let comp;
+let sys;
 
 const ECSObject = {
 	// LIFECYCLE JAZZ
@@ -15,40 +17,43 @@ const ECSObject = {
 	},//init
 
 	connected(){
+		console.log("connected", this)
+		// fire connected lifecycle callback on all attached systems
+		for(const system of this.systems.values()) system.connected(this);
 		// fire connected lifecycle callback on all attached components
-		for(const component of this.components.values()){
-			component.connected(this);
-		}
+		for(const component of this.components.values()) component.connected(this);
 	},// connected
 	disconnected(){
+		// fire disconnected lifecycle callback on all attached systems
+		for(const system of this.systems.values()) system.disconnected(this);
 		// fire disconnected lifecycle callback on all attached components
-		for(const component of this.components.values()){
-			component.disconnected(this);
-		}
+		for(const component of this.components.values()) component.disconnected(this);
 	},// disconnected
 
 	play(){
+		// fire play lifecycle callback on all attached systems
+		for(const system of this.systems.values()) system.play();
 		// fire play() lifecycle callback on all attached components
-		for(const component of this.components.values()){
-			component.play();
-		}
+		for(const component of this.components.values()) component.play();
 	},// play
 	pause(){
+		// fire pause lifecycle callback on all attached systems
+		for(const system of this.systems.values()) system.pause();
 		// fire pause() lifecycle callback on all attached components
-		for(const component of this.components.values()){
-			component.pause();
-		}
+		for(const component of this.components.values()) component.pause();
 	}, // pause
 
 	tick(time, deltaTime){
-		for(comp of this.components.values()){
-			comp.tick(time, deltaTime);
-		}
+		// fire tick lifecycle callback on all attached systems
+		for(sys of this.systems.values()) system.tick(time, deltaTime);
+		// fire tick lifecycle callback on all attached components
+		for(comp of this.components.values()) comp.tick(time, deltaTime);
 	}, // tick
 	tock(time, deltaTime){
-		for(comp of this.components.values()){
-			comp.tock(time, deltaTime);
-		}
+		// fire tock lifecycle callback on all attached systems
+		for(sys of this.systems.values()) system.tock(time, deltaTime);
+		// fire tock lifecycle callback on all attached components
+		for(comp of this.components.values()) comp.tock(time, deltaTime);
 	}, // tock
 
 
@@ -84,7 +89,7 @@ const ECSObject = {
 			}
 		}
 
-		EventDispatcher.prototype.dispatchEvent.call(this, event, ...otherArgs);
+		EntityEventDispatcher.prototype.dispatchEvent.call(this, event, ...otherArgs);
 
 		if (!propagationStopped && bubbles) {
 			this.parent?.dispatchEvent(event);
