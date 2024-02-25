@@ -1,4 +1,5 @@
-import { EntityEventDispatcher } from "../../utils/index.js";
+import { EventDispatcher } from "three";
+// import { EntityEventDispatcher } from "../../utils/index.js";
 
 
 let comp;
@@ -17,7 +18,9 @@ const ECSObject = {
 	},//init
 
 	connected(){
-		console.log("connected", this)
+		// mark this entity as connected 
+		this.isConnected = true;
+
 		// fire connected lifecycle callback on all attached systems
 		for(const system of this.systems.values()) system.connected(this);
 		// fire connected lifecycle callback on all attached components
@@ -45,13 +48,13 @@ const ECSObject = {
 
 	tick(time, deltaTime){
 		// fire tick lifecycle callback on all attached systems
-		for(sys of this.systems.values()) system.tick(time, deltaTime);
+		for(sys of this.systems.values()) sys.tick(time, deltaTime);
 		// fire tick lifecycle callback on all attached components
 		for(comp of this.components.values()) comp.tick(time, deltaTime);
 	}, // tick
 	tock(time, deltaTime){
 		// fire tock lifecycle callback on all attached systems
-		for(sys of this.systems.values()) system.tock(time, deltaTime);
+		for(sys of this.systems.values()) sys.tock(time, deltaTime);
 		// fire tock lifecycle callback on all attached components
 		for(comp of this.components.values()) comp.tock(time, deltaTime);
 	}, // tock
@@ -61,8 +64,8 @@ const ECSObject = {
 	// -------------------------------------
 	add(entity){
 		if(entity.isEntity){
-			entity.connected();
-			if(this.isPlaying) entity.play();
+			if(this.isConnected) entity.connected();
+			if(this.isPlaying)   entity.play();
 		}
 	},// add
 	remove(entity){
@@ -89,7 +92,7 @@ const ECSObject = {
 			}
 		}
 
-		EntityEventDispatcher.prototype.dispatchEvent.call(this, event, ...otherArgs);
+		EventDispatcher.prototype.dispatchEvent.call(this, event, ...otherArgs);
 
 		if (!propagationStopped && bubbles) {
 			this.parent?.dispatchEvent(event);
@@ -107,6 +110,10 @@ const ECSObject = {
 		// add the new system
 		this.systems.set(systemName, system);
 		system.entity = this;
+
+		// call the appropriate system lifecycle methods if it's been added after the entity has been connected
+		if(this.isConnected) system.connected(this);
+		if(this.isPlaying)   system.play();
 	},
 	removeSystem(system){
 		const systemName = system.constructor.name;
@@ -128,6 +135,12 @@ const ECSObject = {
 		// add the new component to this entity
 		this.components.set(componentName, component);
 		component.entity = this;
+
+		console.log("added component", component)
+
+		// call the appropriate component lifecycle methods if it's been added after the entity has been connected
+		if(this.isConnected) component.connected(this);
+		if(this.isPlaying)   component.play();
 
 		// update the dependency map to include this component
 		for(const provider of component.constructor.dependencies){

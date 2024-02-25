@@ -21,6 +21,7 @@ export default class World extends Scene {
 
 	// static state
 	#isPlaying    = false;
+	#isConnected  = false;
 	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
@@ -32,14 +33,41 @@ export default class World extends Scene {
 	static get mappings(){ return {}; }
 
 	// PUBLIC PROPERTIES
+	// ~~ getters ~~
 	get canvas()       { return this.#renderer.domElement; }
 	get systems()      { return this.#systems;             }
 	get components()   { return this.#components;          }
 	get dependencies() { return this.#dependencies;        }
 	get isPlaying()    { return this.#isPlaying;           }
+	get isConnected()  { return this.#isConnected;         }
+
+	// ~~ setters ~~
+	set isConnected(isConnected){ this.#isConnected = isConnected; }
 
 	// PUBLIC METHODS
 	// ~~ lifecycle jazz ~~
+	constructor(children = [], systems = [], components = [], properties = {}){
+		super();
+
+		ECSObject.init.apply(this, [ children, systems, components, properties ]);
+
+		const {
+			samplerate = 1 // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
+		} = properties;
+
+		// adopt properties
+		this.#samplerate = samplerate;
+
+		// initialise required instances
+		this.#renderer = new WebGLRenderer({ antialias: true });
+		this.#camera   = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
+
+		// add event listeners
+		window.addEventListener("resize", this.#handleResize);
+		this.addEventListener(CAMERA_ADDED, this.#updatePrimaryCamera);
+		this.addEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
+	}// constructor
+
 	connected(){
 		this.#updateStateDimensions();
 
@@ -172,31 +200,6 @@ export default class World extends Scene {
 	}// #tock
 
 
-	// DEFAULT LIFECYCLE JAZZ
-	// -------------------------------------
-	constructor(children = [], systems = [], components = [], properties = {}){
-		super();
-
-		ECSObject.init.apply(this, [ children, systems, components, properties ]);
-
-		const {
-			samplerate = 1 // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
-		} = properties;
-
-		// adopt properties
-		this.#samplerate = samplerate;
-
-		// initialise required instances
-		this.#renderer = new WebGLRenderer({ antialias: true });
-		this.#camera   = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
-
-		// add event listeners
-		window.addEventListener("resize", this.#handleResize);
-		this.addEventListener(CAMERA_ADDED, this.#updatePrimaryCamera);
-		this.addEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
-	}// constructor
-
-
 	// EVENT HANDLERS
 	// -------------------------------------
 	#handleResize = event => {
@@ -237,6 +240,7 @@ export default class World extends Scene {
 	}// #updateCameraDimensions
 
 	#updatePrimaryCamera = () => {
+		console.log("update primary camera")
 		this.#camera = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
 	}// #updatePrimaryCamera
 }// World

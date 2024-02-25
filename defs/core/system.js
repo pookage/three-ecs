@@ -25,8 +25,6 @@ export default class System {
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
 	connected(entity){
-		console.log({ entity })
-
 		entity.addEventListener(COMPONENT_CONNECTED, this.#autoRegisterComponent);
 		entity.addEventListener(COMPONENT_DISCONNECTED, this.#autoUnregisterComponent);
 	} // connected
@@ -86,7 +84,8 @@ export default class System {
 	// -------------------------------------
 	#autoRegisterComponent = event => {
 		const { component } = event.detail;
-		const shouldAutoRegisterComponent = this.constructor.autoregister.contains(component.constructor.name);
+
+		const shouldAutoRegisterComponent = this.constructor.autoregister.includes(component.constructor.name);
 		
 		if(shouldAutoRegisterComponent){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
@@ -96,7 +95,7 @@ export default class System {
 
 	#autoUnregisterComponent = event => {
 		const { component } = event.detail;
-		const shouldAutoRegisterComponent = this.constructor.autoregister.contains(component.constructor.name);
+		const shouldAutoRegisterComponent = this.constructor.autoregister.includes(component.constructor.name);
 
 		if(shouldAutoRegisterComponent){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?

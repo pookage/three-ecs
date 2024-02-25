@@ -39,7 +39,7 @@ export default class Component {
 		}
 
 		// broadcast a wider connection event for anything else to hook onto
-		this.entity.dispatchEvent(
+		/*this.entity.dispatchEvent(
 			new CustomEvent(
 				CONNECTED,
 				{
@@ -49,7 +49,7 @@ export default class Component {
 					}
 				}
 			)
-		);
+		);*/
 	}// connected
 	disconnected(entity){
 		// let any dependencies know that this component has been removed
@@ -62,7 +62,7 @@ export default class Component {
 		}
 
 		// broadcast a wider connection event for anything else to hook onto
-		this.entity.dispatchEvent(
+		/*this.entity.dispatchEvent(
 			new CustomEvent(
 				DISCONNECTED,
 				{
@@ -72,7 +72,7 @@ export default class Component {
 					}
 				}
 			)
-		);
+		);*/
 	}// disconnected
 
 	update(property, previous, current){

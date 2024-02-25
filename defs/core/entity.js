@@ -12,6 +12,7 @@ export default class Entity extends Object3D {
 	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 	// static state
 	#isPlaying    = false;
+	#isConnected  = false;
 	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
@@ -36,11 +37,16 @@ export default class Entity extends Object3D {
 	}// get defaultComponents
 
 	// PUBLIC PROPERTIES
+	// ~~ getters ~~
 	get systems()      { return this.#systems;      }
 	get components()   { return this.#components;   }
 	get dependencies() { return this.#dependencies; }
 	get isPlaying()    { return this.#isPlaying;    }
+	get isConnected()  { return this.#isConnected;  }
 	get isEntity()     { return true; }
+
+	// ~~ setters ~~
+	set isConnected(isConnected){ this.#isConnected = isConnected; }
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
