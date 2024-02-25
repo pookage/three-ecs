@@ -7,7 +7,9 @@ export default class System {
 	#entity;
 
 	// static state
-	#registeredComponents = new Set();
+	#registeredComponentList = new Set();
+	#registeredComponents    = new Map();
+
 
 
 	// INTERFACE
@@ -17,8 +19,9 @@ export default class System {
 
 	// PUBLIC PROPERTIES
 	// ~~ getters ~~
-	get registeredComponents(){ return this.#registeredComponents; }
-	get entity()              { return this.#entity;               }
+	get registeredComponentList(){ return this.#registeredComponentList; }
+	get registeredComponents()   { return this.#registeredComponents;    }
+	get entity()                 { return this.#entity;                  }
 	// ~~setters ~~
 	set entity(entity){ this.#entity = entity; }
 
@@ -56,9 +59,18 @@ export default class System {
 	// UTILS
 	// -------------------------------------
 	#register = component => {
-		const hasRegisteredComponent = this.#registeredComponents.has(component);
+		const hasRegisteredComponent = this.#registeredComponentList.has(component);
 
-		if(!hasRegisteredComponent) this.#registeredComponents.add(component);
+		if(!hasRegisteredComponent){
+			const name = component.constructor.name;
+
+			// add the component to the list of registered components
+			this.#registeredComponentList.add(component);
+
+			// also add the component to a Map() grouped by component type
+			if(this.#registeredComponents.has(name)) this.#registeredComponents.get(name).add(component);
+			else                                     this.#registeredComponents.set(name, new Set([ component ]));
+		}
 		else {
 			console.warn(
 				`[WARNING](${this.constructor.name}) Cannot register component`,
@@ -69,9 +81,15 @@ export default class System {
 		
 	}// #register
 	#unregister = component => {
-		const hasRegisteredComponent = this.#registeredComponents.has(component);
+		const hasRegisteredComponent = this.#registeredComponentList.has(component);
 
-		if(hasRegisteredComponent) this.#registeredComponents.delete(component);
+		if(hasRegisteredComponent){
+			const name = component.constructor.name;
+
+			// remove this component from all System storage
+			this.#registeredComponentList.delete(component);
+			this.#registeredComponents.get(name).delete(component);
+		}
 		else {
 			console.warn(
 				`[WARNING](${this.constructor.name}) Cannot un-register component`,

@@ -68,7 +68,7 @@
 				}// removed
 
 				update(){
-					for(const component of this.registeredComponents.values()){
+					for(const component of this.registeredComponentList.values()){
 						component.entity.dispatchEvent({
 							type: "SYSTEM__NOISY_SYSTEM__UPDATE"
 						});
