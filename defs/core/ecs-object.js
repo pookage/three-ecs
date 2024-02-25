@@ -64,12 +64,14 @@ const ECSObject = {
 	// -------------------------------------
 	add(entity){
 		if(entity.isEntity){
+			entity.added();
 			if(this.isConnected) entity.connected();
 			if(this.isPlaying)   entity.play();
 		}
 	},// add
 	remove(entity){
 		if(entity.isEntity){
+			entity.removed();
 			entity.disconnected();
 		}
 	},// remove
@@ -112,13 +114,15 @@ const ECSObject = {
 		system.entity = this;
 
 		// call the appropriate system lifecycle methods if it's been added after the entity has been connected
+		system.added(this);
 		if(this.isConnected) system.connected(this);
 		if(this.isPlaying)   system.play();
 	},
 	removeSystem(system){
 		const systemName = system.constructor.name;
 
-		// call the systems 'remove' lifecycle method
+		// call the appropriate system
+		system.removed();
 		system.disconnected(this);
 		// remove the system from this entity
 		this.systems.delete(systemName);
@@ -136,9 +140,8 @@ const ECSObject = {
 		this.components.set(componentName, component);
 		component.entity = this;
 
-		console.log("added component", component)
-
 		// call the appropriate component lifecycle methods if it's been added after the entity has been connected
+		component.added(this);
 		if(this.isConnected) component.connected(this);
 		if(this.isPlaying)   component.play();
 
@@ -160,7 +163,8 @@ const ECSObject = {
 			dependencies.splice(dependencies.indexOf(componentName), 1)
 		}
 
-		// call the components 'remove' lifecycle method
+		// call the appropriate component lifecycle methods
+		component.removed();
 		component.disconnected(this);
 		// remove the component from this entity
 		this.components.delete(componentName);

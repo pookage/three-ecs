@@ -1,4 +1,4 @@
-import { COMPONENT_CONNECTED, COMPONENT_DISCONNECTED } from "./component/index.js";
+import { COMPONENT_ADDED, COMPONENT_REMOVED } from "./component/index.js";
 
 export default class System {
 	// PRIVATE PROPERTIES
@@ -24,14 +24,17 @@ export default class System {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	connected(entity){
-		entity.addEventListener(COMPONENT_CONNECTED, this.#autoRegisterComponent);
-		entity.addEventListener(COMPONENT_DISCONNECTED, this.#autoUnregisterComponent);
-	} // connected
-	disconnected(entity){
-		entity.removeEventListener(COMPONENT_CONNECTED, this.#autoRegisterComponent);
-		entity.removeEventListener(COMPONENT_DISCONNECTED, this.#autoUnregisterComponent);
-	} // disconnected
+	added(entity){
+		entity.addEventListener(COMPONENT_ADDED, this.#autoRegisterComponent);
+		entity.addEventListener(COMPONENT_REMOVED, this.#autoUnregisterComponent);
+	}// added
+	removed(entity){
+		entity.removeEventListener(COMPONENT_ADDED, this.#autoRegisterComponent);
+		entity.removeEventListener(COMPONENT_REMOVED, this.#autoUnregisterComponent);
+	}// removed
+
+	connected(entity){} // connected
+	disconnected(entity){} // disconnected
 
 	play(){ } // play
 	pause(){ } // pause

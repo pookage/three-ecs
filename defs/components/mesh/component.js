@@ -22,23 +22,26 @@ export default class Mesh extends Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	connected(entity){
-		super.connected(entity);
-		entity.add(this.#mesh);
-	}// connected
-	disconnected(entity){
-		super.disconnected(entity);
-		entity.remove(this.#mesh);
-	}// disconnected
+	added(entity){
+		super.added(entity); 
+		this.#replaceMesh(entity); 
+	}// added
+	removed(entity){
+		super.removed(entity); 
+		entity.remove(this.#mesh); 
+	}// removed
 
 	// ~~ dependency lifecycle methods ~~
 	dependencyAdded(component, data){
+		super.dependencyAdded(component, data);
 		this.#replaceMesh(this.entity);
 	}// dependencyAdded
 	dependencyUpdated(component, property, previous, current){
+		super.dependencyUpdated(component, property, previous, current);
 		this.#replaceMesh(this.entity);	
 	}// dependencyUpdated
 	dependencyRemoved(component){
+		super.dependencyRemoved(component);
 		this.#replaceMesh(this.entity);
 	}// dependencyRemoved
 

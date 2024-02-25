@@ -38,8 +38,6 @@ export default class Material extends Component {
 		this.#material = this.#generateMaterial(this.data);
 	}// constructor
 	update(property, previous, current){
-		super.update(property, previous, current);
-
 		if(previous !== current){
 			switch(property){
 				case "type": {
@@ -52,6 +50,8 @@ export default class Material extends Component {
 				}
 			}
 		}
+
+		super.update(property, previous, current);
 	}// update
 
 

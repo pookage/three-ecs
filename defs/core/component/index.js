@@ -1,8 +1,8 @@
 import Component from "./definition.js";
 import {
-	CONNECTED    as COMPONENT_CONNECTED,
-	DISCONNECTED as COMPONENT_DISCONNECTED
+	ADDED   as COMPONENT_ADDED,
+	REMOVED as COMPONENT_REMOVED
 } from "./events.js";
 
-export { Component, COMPONENT_CONNECTED, COMPONENT_DISCONNECTED };
+export { Component, COMPONENT_ADDED, COMPONENT_REMOVED };
 export default Component;

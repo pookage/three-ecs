@@ -1,2 +1,2 @@
-export const CONNECTED    = "COMPONENT__CONNECTED";
-export const DISCONNECTED = "COMPONENT__DISCONNECTED";
+export const ADDED   = "COMPONENT__ADDED";
+export const REMOVED = "COMPONENT__REMOVED";

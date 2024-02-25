@@ -134,7 +134,7 @@ export default class World extends Scene {
 	}// add
 	remove(entity){
 		super.remove(entity);
-		ECSObject.remove.apply(this, [ entity ]); 
+		ECSObject.remove.apply(this, [ entity ]);
 	}// remove
 
 	addSystem(system){

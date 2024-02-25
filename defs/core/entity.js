@@ -80,6 +80,9 @@ export default class Entity extends Object3D {
 		}
 	}// constructor
 
+	added()  { }// added
+	removed(){ }// remoevd
+
 	connected()   { ECSObject.connected.apply(this);    }// connected
 	disconnected(){ ECSObject.disconnected.apply(this); }// disconnected
 	

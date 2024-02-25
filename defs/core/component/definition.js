@@ -1,6 +1,6 @@
 import { parseUnverifiedConfig, generateReactiveShallowState } from "../../../utils/index.js";
 
-import { CONNECTED, DISCONNECTED } from "./events.js";
+import { ADDED, REMOVED } from "./events.js";
 
 export default class Component {
 	// INTERFACE
@@ -22,12 +22,13 @@ export default class Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	tick(time, delatTime){}// #tick
-	tock(time, delatTime){}// #tock
-	play(){}// #play
-	pause(){}// #pause
+	tick(time, delatTime){}// tick
+	tock(time, delatTime){}// tock
 
-	connected(entity){
+	play(){}// play
+	pause(){}// pause
+
+	added(entity){
 		// let any dependencies know that this component has been added
 		if(entity.dependencies.has(this.constructor.name)){
 			for(const dependency of entity.dependencies.get(this.constructor.name)){
@@ -39,19 +40,13 @@ export default class Component {
 		}
 
 		// broadcast a wider connection event for anything else to hook onto
-		/*this.entity.dispatchEvent(
-			new CustomEvent(
-				CONNECTED,
-				{
-					bubbles: true,
-					detail: {
-						component: this
-					}
-				}
-			)
-		);*/
-	}// connected
-	disconnected(entity){
+		this.entity.dispatchEvent({
+			type: ADDED,
+			bubbles: true,
+			component: this
+		});
+	}// added
+	removed(entity){ 
 		// let any dependencies know that this component has been removed
 		if(entity.dependencies.has(this.constructor.name)){
 			for(const dependency of entity.dependencies.get(this.constructor.name)){
@@ -62,18 +57,15 @@ export default class Component {
 		}
 
 		// broadcast a wider connection event for anything else to hook onto
-		/*this.entity.dispatchEvent(
-			new CustomEvent(
-				DISCONNECTED,
-				{
-					bubbles: true,
-					detail: {
-						component: this
-					}
-				}
-			)
-		);*/
-	}// disconnected
+		this.entity.dispatchEvent({
+			type: REMOVED,
+			bubbles: true,
+			component: this
+		});
+	}// removed
+
+	connected(entity){ }// connected
+	disconnected(entity){ }// disconnected
 
 	update(property, previous, current){
 		// let any dependencies know that a change has occurred

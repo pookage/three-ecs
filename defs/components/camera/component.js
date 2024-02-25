@@ -47,17 +47,6 @@ export default class Camera extends Component {
 	// ~~ getters ~~
 	get camera(){ return this.#camera; }
 
-	// ~~ setters ~~
-	set entity(entity){
-		super.entity = entity;
-		console.log("adding camera")
-		entity.dispatchEvent({ 
-			type: CAMERA_ADDED,
-			bubbles: true,
-			camera: this.#camera
-		});
-	}// set entity
-
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
 	constructor(config){
@@ -65,21 +54,27 @@ export default class Camera extends Component {
 
 		this.#camera = this.#createCamera(this.data, this.entity);
 	}// constructor
-	connected(entity){
-		super.connected(entity);
 
-		entity.add(this.#camera);	
-	}// connected
-	disconnected(entity){
-		super.disconnected(entity);
+	added(entity){
+		super.added(entity);
 
+		entity.add(this.#camera);
+		entity.dispatchEvent({ 
+			type: CAMERA_ADDED,
+			bubbles: true,
+			camera: this.#camera
+		});
+	}// added
+	removed(entity){
+		super.removed(entity);
+		
 		entity.remove(this.#camera);
 		entity.dispatchEvent({ 
 			type: CAMERA_REMOVED,
 			bubbles: true,
 			camera: this.#camera
 		});
-	}// disconnected
+	}// removed
 
 	update(property, previous, current){
 		if(previous !== current){
