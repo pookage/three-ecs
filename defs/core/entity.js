@@ -1,7 +1,7 @@
 import { Object3D, MathUtils } from "three";
 
 import ECSObject from "./ecs-object.js";
-import { componentRegistry, toProperCase, parseAsThreeProperty } from "../../utils/index.js";
+import { systemRegistry, componentRegistry, toProperCase, parseAsThreeProperty } from "../../utils/index.js";
 
 
 export default class Entity extends Object3D {
@@ -9,8 +9,10 @@ export default class Entity extends Object3D {
 	// -------------------------------------
 	// helpers
 	#component;
+	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 	// static state
 	#isPlaying    = false;
+	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
 
@@ -26,6 +28,9 @@ export default class Entity extends Object3D {
 			"visible" : "entity.visible"
 		}
 	}// get mappings
+	static get defaultSystems(){
+		return {};
+	}// get defaultSystems
 	static get defaultComponents(){
 		return {};
 	}// get defaultComponents
@@ -38,27 +43,43 @@ export default class Entity extends Object3D {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	connected(){
-		// fire connected lifecycle callback on all attached components
-		for(const component of this.#components.values()){
-			component.connected(this);
-		}
-	}// #connected
+	constructor(
+		children          = [], 
+		initialSystems    = [],
+		initialComponents = [],
+		properties        = {}
+	){
+		super();
 
-	disconnected(){
-		// fire disconnected lifecycle callback on all attached components
-		for(const component of this.#components.values()){
-			component.disconnected(this);
+		const defaultSystems = Object
+			.entries(this.constructor.defaultSystems)
+			.map(([ name, systemProperties ]) => new (systemRegistry.get(name))(systemProperties));
+		const systems = [ ...defaultSystems, ...initialSystems ];
+
+		// define all the components to be attached to this entity
+		const defaultComponents = Object
+			.entries(this.constructor.defaultComponents)
+			.map(([ name, componentProperties ]) => new (componentRegistry.get(name))(componentProperties));
+		const components = [ ...defaultComponents, ...initialComponents ];
+
+		// initialise the entity with functionality shared by all ECS entities
+		ECSObject.init.apply(this, [ children, systems, components, properties ]);
+
+		// apply mapped properties to the underlying Object3D directly
+		for(const [key, value] of Object.entries(properties)) {
+			if(Object.keys(this.constructor.mappings).includes(key)){
+				this.applyProperty(key, value);	
+			}
 		}
-	}// #disconnected
+	}// constructor
+
+	connected()   { ECSObject.connected.apply(this);    }// connected
+	disconnected(){ ECSObject.disconnected.apply(this); }// disconnected
 	
 	play(){
 		if(!this.#isPlaying){
 			this.#isPlaying = true;
-			// fire play() lifecycle callback on all attached components
-			for(const component of this.components.values()){
-				component.play();
-			}
+			ECSObject.play.apply(this);
 		} else {
 			console.warn("[WARNING](Entity) You called .play() on an entity that was already playing: call to play ignored.", this);
 		}
@@ -66,25 +87,20 @@ export default class Entity extends Object3D {
 	pause(){
 		if(this.#isPlaying){
 			this.#isPlaying = false;
-			// fire pause() lifecycle callback on all attached components
-			for(const component of this.components.values()){
-				component.pause();
-			}
+			ECSObject.pause.apply(this);
 		} else {
 			console.warn("[WARNING](Entity) You called .pause() on an entity that was already paused: call to pause ignored.", this);
 		}
 	}// pause
 
 	tick(time, deltaTime){
-		for(this.#component of this.#components.values()){
-			this.#component.tick(time, deltaTime);
-		}
+		this.#tickData[0] = time;
+		this.#tickData[1] = deltaTime;
+		ECSObject.tick.apply(this, this.#tickData);
 	}// #tick
 
 	tock(time, deltaTime){
-		for(this.#component of this.#components.values()){
-			this.#component.tock(time, deltaTime);
-		}
+		ECSObject.tock.apply(this, this.#tickData);
 	}// #tock
 
 	add(entity, ...otherArgs){
@@ -97,53 +113,15 @@ export default class Entity extends Object3D {
 	} // remove
 
 	// ~~ utils ~~
-	addComponent(component){
-		ECSObject.addComponent.apply(this, [ component ])
-	}// addComponent
-	removeComponent(component){
-		ECSObject.removeComponent.apply(this, [ component ])
-	}// removeComponent
+	addSystem(system)   { ECSObject.addSystem.apply(this,    [ system ]); }// addSystem
+	removeSystem(system){ ECSObject.removeSystem.apply(this, [ system ]); }// removeSystem
 
-	dispatchEvent(event, ...otherArgs){
-		ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]);
-	}// dispatchEvent
+	addComponent(component)   { ECSObject.addComponent.apply(this,    [ component ]); }// addComponent
+	removeComponent(component){ ECSObject.removeComponent.apply(this, [ component ]); }// removeComponent
 
-	applyProperty(key, value){
-		return this.#applyProperty(key, value);
-	}// applyProperty
+	dispatchEvent(event, ...otherArgs){ ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]); }// dispatchEvent
 
-
-
-	// DEFAULT LIFECYCLE JAZZ
-	// -------------------------------------
-	constructor(
-		children = [], 
-		initialComponents = [],
-		initialSystems = [],
-		properties = {}
-	){
-		super();
-
-		// define all the components to be attached to this entity
-		const defaultComponents = Object
-			.entries(this.constructor.defaultComponents)
-			.map(([ name, componentProperties ]) => new (componentRegistry.get(name))(componentProperties));
-		const components = [ ...defaultComponents, ...initialComponents ];
-
-		// initialise the entity with functionality shared by all ECS entities
-		ECSObject.init.apply(this, [ children, components, properties ]);
-
-		// apply mapped properties to the underlying Object3D directly
-		for(const [key, value] of Object.entries(properties)) {
-			if(Object.keys(this.constructor.mappings).includes(key)){
-				this.#applyProperty(key, value);	
-			}
-		}
-	}// constructor
-
-	// UTILS
-	// -------------------------------------
-	#applyProperty = (key, rawValue) => {
+	applyProperty(key, rawValue){
 		const [ name, property ] = this.constructor.mappings[key]?.split(".");
 		const value              = parseAsThreeProperty(rawValue, property);
 
@@ -173,5 +151,5 @@ export default class Entity extends Object3D {
 				default: this[key] = value;
 			}
 		} 
-	}// #applyProperty
+	}// applyProperty
 }// Entity

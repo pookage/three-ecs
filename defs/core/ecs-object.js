@@ -1,16 +1,59 @@
 import { EventDispatcher } from "three";
 
+let comp;
+
 const ECSObject = {
 	// LIFECYCLE JAZZ
 	// -------------------------------------
-	init(children = [], components = [], properties = {}){
+	init(children = [], systems = [], components = [], properties = {}){
 		// adopt children
 		for(const child of children) this.add(child);
+		// adopt systems
+		for(const system of systems) this.addSystem(system);
 		// adopt components
 		for(const component of components) this.addComponent(component);
 	},//init
 
-	// NOTE: these lifecyle methods might only be needed by the World.js - confirm after testing
+	connected(){
+		// fire connected lifecycle callback on all attached components
+		for(const component of this.components.values()){
+			component.connected(this);
+		}
+	},// connected
+	disconnected(){
+		// fire disconnected lifecycle callback on all attached components
+		for(const component of this.components.values()){
+			component.disconnected(this);
+		}
+	},// disconnected
+
+	play(){
+		// fire play() lifecycle callback on all attached components
+		for(const component of this.components.values()){
+			component.play();
+		}
+	},// play
+	pause(){
+		// fire pause() lifecycle callback on all attached components
+		for(const component of this.components.values()){
+			component.pause();
+		}
+	}, // pause
+
+	tick(time, deltaTime){
+		for(comp of this.components.values()){
+			comp.tick(time, deltaTime);
+		}
+	}, // tick
+	tock(time, deltaTime){
+		for(comp of this.components.values()){
+			comp.tock(time, deltaTime);
+		}
+	}, // tock
+
+
+	// UTILS
+	// -------------------------------------
 	add(entity){
 		if(entity.isEntity){
 			entity.connected();
@@ -23,8 +66,6 @@ const ECSObject = {
 		}
 	},// remove
 
-	// UTILS
-	// -------------------------------------
 	dispatchEvent(event, ...otherArgs){
 		/*
 			NOTE:
@@ -49,6 +90,28 @@ const ECSObject = {
 			this.parent?.dispatchEvent(event);
 		}
 	}, //dispatchEvent
+
+	addSystem(system){
+		const systemName = system.constructor.name;
+
+		if(this.systems.has(systemName)){
+			console.warn(`[WARNING] ${this.constructor.name} already has a ${systemName} instance - this will be removed and replaced with the new one`);
+			this.removeSystem(this.systems.get(systemName));
+		}
+
+		// add the new system
+		this.systems.set(systemName, system);
+		system.entity = this;
+	},
+	removeSystem(system){
+		const systemName = system.constructor.name;
+
+		// call the systems 'remove' lifecycle method
+		system.disconnected(this);
+		// remove the system from this entity
+		this.systems.delete(systemName);
+	},
+
 	addComponent(component){
 		const componentName = component.constructor.name;
 
@@ -57,7 +120,7 @@ const ECSObject = {
 			this.removeComponent(this.components.get(componentName));
 		}
 
-		// add the new component
+		// add the new component to this entity
 		this.components.set(componentName, component);
 		component.entity = this;
 

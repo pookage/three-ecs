@@ -17,9 +17,11 @@ export default class World extends Scene {
 	#frame;
 	#deltaTime;
 	#lastTickTime;
+	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 
 	// static state
 	#isPlaying    = false;
+	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
 
@@ -31,6 +33,7 @@ export default class World extends Scene {
 
 	// PUBLIC PROPERTIES
 	get canvas()       { return this.#renderer.domElement; }
+	get systems()      { return this.#systems;             }
 	get components()   { return this.#components;          }
 	get dependencies() { return this.#dependencies;        }
 	get isPlaying()    { return this.#isPlaying;           }
@@ -39,6 +42,9 @@ export default class World extends Scene {
 	// ~~ lifecycle jazz ~~
 	connected(){
 		this.#updateStateDimensions();
+
+		// apply any shared connected functionality
+		ECSObject.connected.apply(this);
 		this.traverse(entity => {
 			if(entity.isEntity) entity.connected();
 		});
@@ -53,6 +59,7 @@ export default class World extends Scene {
 		this.removeEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
 
 		// apply any shared disconnected functionality
+		ECSObject.disconnected.apply(this);
 		this.traverse(entity => {
 			if(entity.isEntity) entity.disconnected();
 		});
@@ -64,6 +71,8 @@ export default class World extends Scene {
 		if(canPlay){
 			if(!this.#isPlaying){
 				this.#isPlaying = true;
+				
+				ECSObject.play.apply(this);
 				this.traverse(entity => {
 					if(entity.isEntity) entity.play();
 				});
@@ -78,8 +87,11 @@ export default class World extends Scene {
 	}// play
 	pause(){
 		if(this.#isPlaying){
-			this.#isPlaying = false;
 			cancelAnimationFrame(this.#frame);
+
+			this.#isPlaying = false;
+			
+			ECSObject.pause.apply(this);
 			this.traverse(entity => {
 				if(entity.isEntity) entity.pause();
 			});
@@ -95,7 +107,14 @@ export default class World extends Scene {
 	remove(entity){
 		super.remove(entity);
 		ECSObject.remove.apply(this, [ entity ]); 
-	}// remove	
+	}// remove
+
+	addSystem(system){
+		ECSObject.addSystem.apply(this, [ system ]);
+	}// addSystem
+	removeSystem(system){
+		ECSObject.removeSystem.apply(this, [ system ]);
+	}// removeSystem
 
 	addComponent(component){
 		ECSObject.addComponent.apply(this, [ component ]);
@@ -114,23 +133,37 @@ export default class World extends Scene {
 	#tick = (time) => {
 		// queue-up the next animation frame
 		this.#frame = requestAnimationFrame(this.#tick);
+		
 		// calculate the time since our last tick
 		this.#deltaTime = time - (this.#lastTickTime || time);
+		
+		// apply tick to all components on the scene
+		this.#tickData[0] = time;
+		this.#tickData[1] = this.#deltaTime;
+		ECSObject.tick.apply(this, this.#tickData);
+
 		// apply tick to all entities in the scene
 		this.traverse(entity => {
 			if(entity.isEntity){
 				entity.tick(time, this.#deltaTime);
 			}
 		});
+		
 		// render the new scene
 		this.#renderer.render(this, this.#camera);
+		
 		// apply any calculations that need to happen AFTER the animation frame
 		this.#tock(time, this.#deltaTime);
+		
 		// store the time for the next deltaTime calculation
 		this.#lastTickTime = time;
 	}// #tick
 
 	#tock = (time, deltaTime) => {
+		// apply tock to all components on the scene
+		ECSObject.tock.apply(this, this.#tickData);
+
+		// apply tock to all entities in the scene
 		this.traverse(entity => {
 			if(entity.isEntity){
 				entity.tick(time, this.#deltaTime);
@@ -141,10 +174,10 @@ export default class World extends Scene {
 
 	// DEFAULT LIFECYCLE JAZZ
 	// -------------------------------------
-	constructor(children = [], components = [], properties = {}){
+	constructor(children = [], systems = [], components = [], properties = {}){
 		super();
 
-		ECSObject.init.apply(this, [ children, components, properties ]);
+		ECSObject.init.apply(this, [ children, systems, components, properties ]);
 
 		const {
 			samplerate = 1 // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)

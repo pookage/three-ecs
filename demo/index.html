@@ -13,19 +13,38 @@
 			}
 		</script>
 		<script type="module">
-			import { Color, AmbientLight, PerspectiveCamera, BoxGeometry, MeshBasicMaterial } from "three";
-			import { World, Entity, Camera, Geometry, Material, Mesh } from "three-ecs";
+			import { 
+				World, Entity, Component, System, 
+				Camera, Geometry, Material, Mesh,
+				componentRegistry, systemRegistry
+			} from "three-ecs";
+
+			class NoisySystem extends System {
+				static get autoregister(){
+					return [
+						"noisy-component"
+					]
+				}// get autoregister
+
+				connected(){
+					super.connected();
+
+					console.log("Noisy system added!");
+				}// connected
+			}// NoisySystem
+
+			systemRegistry.set("noisy-system", NoisySystem);
 
 			const world = window.WORLD = new World([
 				// create a red box to the left
 				new Entity(
 					[], 
+					[],
 					[
 						new Geometry(),
 						new Material({ color: 0xff0000 }),
 						new Mesh()
 					],
-					[],
 					{
 						position: {
 							x: -2
@@ -35,12 +54,12 @@
 				// create a blue box to the right
 				new Entity(
 					[], 
+					[],
 					[
 						new Geometry(),
 						new Material({ color: 0x0000ff }),
 						new Mesh()
 					], 
-					[],
 					{
 						position: {
 							x: 2
@@ -49,8 +68,8 @@
 				),
 				new Entity(
 					[ ],
-					[ new Camera() ],
 					[],
+					[ new Camera() ],
 					{
 						position: {
 							y: 1,
@@ -58,6 +77,8 @@
 						}
 					}
 				)
+			], [
+				new NoisySystem()
 			]);
 			
 			document.body.appendChild(world.canvas);

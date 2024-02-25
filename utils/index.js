@@ -9,7 +9,7 @@ const defaultPositionSchema = { default: defaultPosition };
 const defaultRotationSchema = { default: defaultRotation };
 const defaultScaleSchema    = { default: defaultScale    };
 
-
+export const systemRegistry    = new Map();
 export const componentRegistry = new Map();
 
 export function findFirstInstanceWithProperty(property){

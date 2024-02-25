@@ -19,19 +19,16 @@ export default class System {
 	// ~~ getters ~~
 	get registeredComponents(){ return this.#registeredComponents; }
 	get entity()              { return this.#entity;               }
+	// ~~setters ~~
+	set entity(entity){ this.#entity = entity; }
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
-	constructor(entity){
-		this.#entity = entity;
-
-		console.warn("[TODO] Confirm that adding this event listener in the constructor is okay and it doesn't need to go in connected()");
+	connected(entity){
 		entity.addEventListener(COMPONENT_CONNECTED, this.#autoRegisterComponent);
 		entity.addEventListener(COMPONENT_DISCONNECTED, this.#autoUnregisterComponent);
-	}// constructor
-
-	connected(){ } // connected
-	disconnected(){
+	} // connected
+	disconnected(entity){
 		entity.removeEventListener(COMPONENT_CONNECTED, this.#autoRegisterComponent);
 		entity.removeEventListener(COMPONENT_DISCONNECTED, this.#autoUnregisterComponent);
 	} // disconnected
