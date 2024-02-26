@@ -246,7 +246,6 @@ export default class World extends Scene {
 	}// #updateCameraDimensions
 
 	#updatePrimaryCamera = () => {
-		console.log("update primary camera")
 		this.#camera = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
 	}// #updatePrimaryCamera
 }// World

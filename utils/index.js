@@ -32,7 +32,6 @@ function getSchemaPropertyType(property, value){
 	return type;
 }// getSchemaPropertyType
 
-
 function parseStringAsThreeProperty(value, property){
 	switch(property){
 		case "position": {
