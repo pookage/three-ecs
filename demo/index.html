@@ -165,7 +165,11 @@
 						}
 					)
 				],
-				[ new NoisySystem() ] 
+				[ new NoisySystem() ],
+				[],
+				{
+					clearColor: 0x000000
+				}
 			);
 			
 			document.body.appendChild(world.canvas);
@@ -183,6 +187,7 @@
 			}
 			body {
 				margin: 0;
+				background-color: green;
 			}
 		</style>
 	</head>

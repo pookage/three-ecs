@@ -57,15 +57,22 @@ export default class World extends Scene {
 		ECSObject.init.call(this, children, systems, components, properties);
 
 		const {
-			samplerate = 1 // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
+			samplerate   = 1,        // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
+			clearColor   = 0xffffff, // (Color) what colour to clear the canvas with between frames
+			opacity      = 1.0       // (number)[0-1] what opacity to apply to the clearColor
 		} = properties;
 
 		// adopt properties
 		this.#samplerate = samplerate;
 
 		// initialise required instances
-		this.#renderer = new WebGLRenderer({ antialias: true });
-		this.#camera   = findFirstInstanceWithProperty.call(this, "isCamera");
+		const renderer = this.#renderer = new WebGLRenderer({ 
+			antialias: true
+		});
+		this.#camera = findFirstInstanceWithProperty.call(this, "isCamera");
+
+		// configure core instances
+		renderer.setClearColor(clearColor, opacity);
 
 		// add event listeners
 		window.addEventListener("resize", this.#handleResize);
