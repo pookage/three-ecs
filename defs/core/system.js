@@ -105,10 +105,9 @@ export default class System {
 	// -------------------------------------
 	#autoRegisterComponent = event => {
 		const { component } = event;
+		const shouldComponentAutoRegister = this.constructor.autoregister.some(definition => component instanceof definition );
 
-		const shouldAutoRegisterComponent = this.constructor.autoregister.includes(component.constructor.name);
-
-		if(shouldAutoRegisterComponent){
+		if(shouldComponentAutoRegister){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
 			this.#register(component);
 		}
@@ -116,9 +115,9 @@ export default class System {
 
 	#autoUnregisterComponent = event => {
 		const { component } = event;
-		const shouldAutoRegisterComponent = this.constructor.autoregister.includes(component.constructor.name);
+		const shouldComponentAutoUnregister = this.constructor.autoregister.some(definition => component instanceof definition );
 
-		if(shouldAutoRegisterComponent){
+		if(shouldComponentAutoUnregister){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
 			this.#unregister(component);	
 		}

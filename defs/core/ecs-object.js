@@ -111,42 +111,36 @@ const ECSObject = {
 	}, //dispatchEvent
 
 	addSystem(system){
-		const systemName = system.constructor.name;
-
-		if(this.systems.has(systemName)){
-			console.warn(`[WARNING] ${this.constructor.name} already has a ${systemName} instance - this will be removed and replaced with the new one`);
-			this.removeSystem(this.systems.get(systemName));
+		if(this.systems.has(system.constructor)){
+			console.warn(`[WARNING] ${this.constructor.name} already has a ${system.constructor.name} instance - this will be removed and replaced with the new one`);
+			this.removeSystem(this.systems.get(system.constructor));
 		}
 
 		// add the new system
-		this.systems.set(systemName, system);
+		this.systems.set(system.constructor, system);
 		system.entity = this;
 
 		// call the appropriate system lifecycle methods if it's been added after the entity has been connected
-		system.added(this);
+		if(this.isAdded)     system.added(this);
 		if(this.isConnected) system.connected(this);
 		if(this.isPlaying)   system.play();
 	},
 	removeSystem(system){
-		const systemName = system.constructor.name;
-
 		// call the appropriate system
 		system.removed(this);
 		if(this.isConnected) system.disconnected(this);
 		// remove the system from this entity
-		this.systems.delete(systemName);
+		this.systems.delete(system.constructor);
 	},
 
 	addComponent(component, isParentAdded){
-		const componentName = component.constructor.name;
-
-		if(this.components.has(componentName)){
-			console.warn(`[WARNING] ${this.constructor.name} already has a ${componentName} instance - this will be removed and replaced with the new one`);
-			this.removeComponent(this.components.get(componentName));
+		if(this.components.has(component.constructor)){
+			console.warn(`[WARNING] ${this.constructor.name} already has a ${component.constructor.name} instance - this will be removed and replaced with the new one`);
+			this.removeComponent(this.components.get(component.constructor));
 		}
 
 		// add the new component to this entity
-		this.components.set(componentName, component);
+		this.components.set(component.constructor, component);
 		component.entity = this;
 
 		// call the appropriate component lifecycle methods if it's been added after the entity has been connected
@@ -157,26 +151,24 @@ const ECSObject = {
 		// update the dependency map to include this component
 		for(const provider of component.constructor.dependencies){
 			if(this.dependencies.get(provider)){
-				this.dependencies.get(provider).push(componentName);
+				this.dependencies.get(provider).push(component.constructor);
 			} else {
-				this.dependencies.set(provider, [ componentName ]);
+				this.dependencies.set(provider, [ component.constructor ]);
 			}
 		}
 	}, // addComponent
 	removeComponent(component){
-		const componentName = component.constructor.name;
-
 		// remove this component as a dependency on all other components
 		for(const dependencies of this.dependencies.values()){
-			if(dependencies.includes(componentName))
-			dependencies.splice(dependencies.indexOf(componentName), 1)
+			if(dependencies.includes(component.constructor))
+			dependencies.splice(dependencies.indexOf(component.constructor), 1)
 		}
 
 		// call the appropriate component lifecycle methods
 		component.removed(this);
 		if(this.isConnected) component.disconnected(this);
 		// remove the component from this entity
-		this.components.delete(componentName);
+		this.components.delete(component.constructor);
 	}// removeComponent
 };
 

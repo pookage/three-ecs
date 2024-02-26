@@ -1,6 +1,8 @@
 import { Mesh as THREEMesh } from "three";
 
 import Component from "../../core/component/index.js";
+import Geometry from "../geometry/index.js";
+import Material from "../material/index.js";
 
 
 export default class Mesh extends Component {
@@ -14,7 +16,10 @@ export default class Mesh extends Component {
 	// -------------------------------------
 	// STATIC PROPERTIES
 	static get dependencies(){
-		return [ "Geometry", "Material" ];
+		return [ 
+			Geometry, 
+			Material 
+		];
 	}// dependencies
 
 	// PUBLIC PROPERTIES
@@ -49,8 +54,8 @@ export default class Mesh extends Component {
 	// UTILS
 	// ---------------------------------
 	#replaceMesh = entity => {
-		const geometry        = entity.components.get("Geometry")?.geometry;
-		const material        = entity.components.get("Material")?.material;
+		const geometry        = entity.components.get(Geometry)?.geometry;
+		const material        = entity.components.get(Material)?.material;
 		const geometryChanged = this.#mesh?.geometry !== geometry;
 		const materialChanged = this.#mesh?.material !== material;
 

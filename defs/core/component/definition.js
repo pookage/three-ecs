@@ -30,10 +30,10 @@ export default class Component {
 
 	added(entity){
 		// let any dependencies know that this component has been added
-		if(entity.dependencies.has(this.constructor.name)){
-			for(const dependency of entity.dependencies.get(this.constructor.name)){
+		if(entity.dependencies.has(this.constructor)){
+			for(const dependency of entity.dependencies.get(this.constructor)){
 				entity.components.get(dependency).dependencyAdded(
-					this.constructor.name,
+					this.constructor,
 					this.data
 				);
 			}
@@ -48,10 +48,10 @@ export default class Component {
 	}// added
 	removed(entity){ 
 		// let any dependencies know that this component has been removed
-		if(entity.dependencies.has(this.constructor.name)){
-			for(const dependency of entity.dependencies.get(this.constructor.name)){
+		if(entity.dependencies.has(this.constructor)){
+			for(const dependency of entity.dependencies.get(this.constructor)){
 				entity.components.get(dependency).dependencyRemoved(
-					this.constructor.name,
+					this.constructor
 				);
 			}
 		}
@@ -69,10 +69,10 @@ export default class Component {
 
 	update(property, previous, current){
 		// let any dependencies know that a change has occurred
-		if(previous !== current && this.#entity.dependencies.has(this.constructor.name)){
-			for(const dependency of this.#entity.dependencies.get(this.constructor.name)){
+		if(previous !== current && this.#entity.dependencies.has(this.constructor)){
+			for(const dependency of this.#entity.dependencies.get(this.constructor)){
 				this.#entity.components.get(dependency).dependencyUpdated(
-					this.constructor.name,
+					this.constructor,
 					property,
 					previous,
 					current

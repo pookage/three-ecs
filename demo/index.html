@@ -13,16 +13,34 @@
 			}
 		</script>
 		<script type="module">
+			import { Color } from "three";
 			import { 
 				World, Entity, Component, System, 
-				Camera, Geometry, Material, Mesh,
-				componentRegistry, systemRegistry
+				Camera, Geometry, Material, Mesh
 			} from "three-ecs";
+
+			console.log(`					
+					4. once it's working on three-ecs, test it throughly by adding / removing components and confirming they're correctly identified
+					5. confirm that adding / removing systems is working too, and remove the 'toProperCase' function as it'll be no-longer needed
+					6. this will remove the need for the componentRegistry entirely, so it should be removed from the three-ecs export
+					7. this will break three-elements, which relies on the componentRegistry to map attributes to components
+					8. three-elements should, as part of its core, define its own componentRegistry purely for the purpose of mapping attributes to components
+					9. if three-elements has and maintains its own componentRegistry, then I don't THINK it'll need any other refactoring!
+			`);
 
 
 			// CUSTOM COMPONENTS
 			// ---------------------------------------------
 			class NoisyComponent extends Component {
+
+				static get schema(){
+					return {
+						message: {
+							default: "monkey"
+						}
+					}
+				}// get schema
+
 				added(entity){
 					super.added(entity);
 
@@ -32,11 +50,9 @@
 				}// added
 
 				#handleNoisySystemUpdate = event => {
-					console.log("The noisy system told me to say something!");
+					console.log(`The noisy system told me to say: ${this.data.message}!`);
 				}// #handleNoisySystemUpdate
 			}// NoisyComponent
-
-			componentRegistry.set("noisy-component", NoisyComponent);
 
 
 			// CUSTOM SYSTEMS
@@ -46,7 +62,7 @@
 
 				static get autoregister(){
 					return [
-						NoisyComponent.name
+						NoisyComponent
 					]
 				}// get autoregister
 
@@ -76,7 +92,41 @@
 				}// update
 			}// NoisySystem
 
-			systemRegistry.set("noisy-system", NoisySystem);
+
+			// CUSTOM ENTITIES
+			// ---------------------------------------------
+			class NoisyEntity extends Entity {
+				static get defaultComponents(){
+					return new Map([
+						[ NoisyComponent, {
+							"message": "ahoy"
+						}]
+					])
+				}
+			}// NoisyEntity
+
+			class Box extends Entity {
+				static get defaultComponents(){
+					return new Map([
+						[ Geometry, {
+							primitive: "box",
+							height: 1,
+							width:  1,
+							depth:  1
+						}],
+						[ Material, {
+							color: 0x00ff00
+						}],
+						[ Mesh ]
+					])
+				}// get defaultComponents
+				static get mappings(){
+					return {
+						...Entity.mappings,
+						"color": [ Material, "color" ]
+					};
+				}// get mappings
+			}// Box
 
 
 			// BUILD-OUT SCENE
@@ -84,9 +134,7 @@
 			const world = window.WORLD = new World(
 				[
 					// create a red box to the left
-					new Entity(
-						[], 
-						[],
+					new Entity([],[],
 						[
 							new Geometry(),
 							new Material({ color: 0xff0000 }),
@@ -98,27 +146,15 @@
 							}
 						}
 					),
-					// create a blue box to the right
-					new Entity(
-						[], 
-						[],
-						[
-							new Geometry(),
-							new Material({ color: 0x0000ff }),
-							new Mesh()
-						], 
-						{
-							position: {
-								x: 2
-							}
+					new Box([],[],[],{
+						color: 0xffff00,
+						position: {
+							x: 2
 						}
-					),
-					new Entity(
-						[],
-						[],
+					}),
+					new Entity([],[],
 						[ 
-							new Camera(),
-							new NoisyComponent()
+							new Camera()
 						],
 						{
 							position: {
@@ -128,9 +164,7 @@
 						}
 					)
 				],
-				[
-					new NoisySystem()
-				], 
+				[] 
 			);
 			
 			document.body.appendChild(world.canvas);

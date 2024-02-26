@@ -34,32 +34,6 @@ function getSchemaPropertyType(property, value){
 	return type;
 }// getSchemaPropertyType
 
-function parseValueWithSchema(value, type, schema = {}){
-	switch(type){
-		case "number": {
-			const parsedValue = parseFloat(value);
-			const {
-				min = parsedValue,
-				max = parsedValue
-			} = schema;
-
-			return MathUtils.clamp(parsedValue, min, max);
-		}
-		case "boolean": return (/true/).test(value);
-		case "color"  : return new Color(value);
-		case "vector3": return new Vector3(
-			parseFloat(value.x ?? schema.default.x), 
-			parseFloat(value.y ?? schema.default.y), 
-			parseFloat(value.z ?? schema.default.z)
-		);
-		case "euler"  : return new Euler(
-			MathUtils.degToRad(parseFloat(value.x ?? schema.default.x)),
-			MathUtils.degToRad(parseFloat(value.y ?? schema.default.y)),
-			MathUtils.degToRad(parseFloat(value.z ?? schema.default.z))
-		);
-		default: return new String(value).toString();
-	}
-}// parseValueWithSchema
 
 function parseStringAsThreeProperty(value, property){
 	switch(property){
@@ -91,7 +65,33 @@ function parseObjectAsThreeProperty(value, property){
 }// parseObjectAsThreeProperty
 
 
-export const systemRegistry    = new Map();
+export function parseValueWithSchema(value, type, schema = {}){
+	switch(type){
+		case "number": {
+			const parsedValue = parseFloat(value);
+			const {
+				min = parsedValue,
+				max = parsedValue
+			} = schema;
+
+			return MathUtils.clamp(parsedValue, min, max);
+		}
+		case "boolean": return (/true/).test(value);
+		case "color"  : return new Color(value);
+		case "vector3": return new Vector3(
+			parseFloat(value.x ?? schema.default.x), 
+			parseFloat(value.y ?? schema.default.y), 
+			parseFloat(value.z ?? schema.default.z)
+		);
+		case "euler"  : return new Euler(
+			MathUtils.degToRad(parseFloat(value.x ?? schema.default.x)),
+			MathUtils.degToRad(parseFloat(value.y ?? schema.default.y)),
+			MathUtils.degToRad(parseFloat(value.z ?? schema.default.z))
+		);
+		default: return new String(value).toString();
+	}
+}// parseValueWithSchema
+
 export const componentRegistry = new Map();
 
 export function findFirstInstanceWithProperty(property){

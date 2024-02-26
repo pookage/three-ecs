@@ -11,12 +11,11 @@ import Material from "./defs/components/material/index.js";
 import Mesh from "./defs/components/mesh/index.js";
 
 // useful utils for other libraries
-import { parseUnverifiedConfig, systemRegistry, componentRegistry } from "./utils/index.js";
+import { parseUnverifiedConfig } from "./utils/index.js";
 
 export { 
 	World, Entity, Component, System,
 	Camera,
 	Geometry, Material, Mesh,
-	systemRegistry, componentRegistry,
 	parseUnverifiedConfig
 };

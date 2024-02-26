@@ -78,6 +78,7 @@ export default class Material extends Component {
 	}// #generateMaterial
 
 	#updateMaterial = (material, property, value) => {
+		console.log({ material, property, value })
 		switch(property){
 			case "color": {
 				material[property] = value;	

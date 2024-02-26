@@ -1,7 +1,7 @@
 import { Object3D, MathUtils } from "three";
 
 import ECSObject from "./ecs-object.js";
-import { systemRegistry, componentRegistry, toProperCase, parseAsThreeProperty } from "../../utils/index.js";
+import { parseAsThreeProperty, parseValueWithSchema } from "../../utils/index.js";
 
 
 export default class Entity extends Object3D {
@@ -24,17 +24,17 @@ export default class Entity extends Object3D {
 	// STATIC PROPERTIES
 	static get mappings(){
 		return {
-			"position": "entity.position",
-			"rotation": "entity.rotation",
-			"scale"   : "entity.scale",
-			"visible" : "entity.visible"
+			"position": [ Entity, "position"],
+			"rotation": [ Entity, "rotation"],
+			"scale"   : [ Entity, "scale"   ],
+			"visible" : [ Entity, "visible" ]
 		}
 	}// get mappings
 	static get defaultSystems(){
-		return {};
+		return [];
 	}// get defaultSystems
 	static get defaultComponents(){
-		return {};
+		return new Map();
 	}// get defaultComponents
 
 	// PUBLIC PROPERTIES
@@ -60,15 +60,13 @@ export default class Entity extends Object3D {
 	){
 		super();
 
-		const defaultSystems = Object
-			.entries(this.constructor.defaultSystems)
-			.map(([ name, systemProperties ]) => new (systemRegistry.get(name))(systemProperties));
+		const defaultSystems = this.constructor.defaultSystems.map(DefaultSystem => new DefaultSystem())
 		const systems = [ ...defaultSystems, ...initialSystems ];
 
 		// define all the components to be attached to this entity
-		const defaultComponents = Object
-			.entries(this.constructor.defaultComponents)
-			.map(([ name, componentProperties ]) => new (componentRegistry.get(name))(componentProperties));
+		const defaultComponents = this.constructor.defaultComponents
+			.entries()
+			.map(([ DefaultComponent, defaultProperties ]) => new DefaultComponent(defaultProperties));
 		const components = [ ...defaultComponents, ...initialComponents ];
 
 		// initialise the entity with functionality shared by all ECS entities
@@ -149,15 +147,22 @@ export default class Entity extends Object3D {
 
 	dispatchEvent(event, ...otherArgs){ ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]); }// dispatchEvent
 
-	applyProperty(key, rawValue){
-		const [ name, property ] = this.constructor.mappings[key]?.split(".");
-		const value              = parseAsThreeProperty(rawValue, property);
+	applyProperty(mappedProperty, rawValue){
+		const [ ComponentConstructor, property ] = this.constructor.mappings[mappedProperty];
 
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
-		if(name !== "entity") this.#components.get(toProperCase(name)).data[property] = value;
+		if(ComponentConstructor !== Entity){
+			this.#components.get(ComponentConstructor).data[property] = parseValueWithSchema(
+				rawValue, 
+				property, 
+				ComponentConstructor.schema[property]
+			);
+		}
 
 		// otherwise assuming we want to manipulate the entity directly and parse it here & now
 		else {
+			const value = parseAsThreeProperty(rawValue, property);
+
 			switch(property){
 				case "position": {
 					this.position.copy(value);
