@@ -7,8 +7,6 @@ import { parseAsThreeProperty, parseValueWithSchema } from "../../utils/index.js
 export default class Entity extends Object3D {
 	// PRIVATE PROPERTIES
 	// -------------------------------------
-	// helpers
-	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 	// static state
 	#isAdded      = false;
 	#isConnected  = false;
@@ -69,7 +67,7 @@ export default class Entity extends Object3D {
 		const components = [ ...defaultComponents, ...initialComponents ];
 
 		// initialise the entity with functionality shared by all ECS entities
-		ECSObject.init.apply(this, [ children, systems, components, properties ]);
+		ECSObject.init.call(this, children, systems, components, properties);
 
 		// apply mapped properties to the underlying Object3D directly
 		for(const [key, value] of Object.entries(properties)) {
@@ -98,13 +96,13 @@ export default class Entity extends Object3D {
 		this.#isAdded = false; 
 	}// remoevd
 
-	connected()   { ECSObject.connected.apply(this);    }// connected
-	disconnected(){ ECSObject.disconnected.apply(this); }// disconnected
+	connected()   { ECSObject.connected.call(this);    }// connected
+	disconnected(){ ECSObject.disconnected.call(this); }// disconnected
 	
 	play(){
 		if(!this.#isPlaying){
 			this.#isPlaying = true;
-			ECSObject.play.apply(this);
+			ECSObject.play.call(this);
 		} else {
 			console.warn("[WARNING](Entity) You called .play() on an entity that was already playing: call to play ignored.", this);
 		}
@@ -112,39 +110,37 @@ export default class Entity extends Object3D {
 	pause(){
 		if(this.#isPlaying){
 			this.#isPlaying = false;
-			ECSObject.pause.apply(this);
+			ECSObject.pause.call(this);
 		} else {
 			console.warn("[WARNING](Entity) You called .pause() on an entity that was already paused: call to pause ignored.", this);
 		}
 	}// pause
 
 	tick(time, deltaTime){
-		this.#tickData[0] = time;
-		this.#tickData[1] = deltaTime;
-		ECSObject.tick.apply(this, this.#tickData);
+		ECSObject.tick.call(this, time, deltaTime);
 	}// #tick
 
 	tock(time, deltaTime){
-		ECSObject.tock.apply(this, this.#tickData);
+		ECSObject.tock.call(this, time, deltaTime);
 	}// #tock
 
 	add(entity, ...otherArgs){
 		super.add(entity, ...otherArgs);
-		ECSObject.add.apply(this, [ entity ]); 
+		ECSObject.add.call(this, entity); 
 	}// add
 	remove(entity){ 
-		ECSObject.remove.apply(this, [ entity ]); 
+		ECSObject.remove.call(this, entity); 
 		super.remove(entity);
 	} // remove
 
 	// ~~ utils ~~
-	addSystem(system)   { ECSObject.addSystem.apply(this,    [ system ]); }// addSystem
-	removeSystem(system){ ECSObject.removeSystem.apply(this, [ system ]); }// removeSystem
+	addSystem(system)   { ECSObject.addSystem.call(this,    system); }// addSystem
+	removeSystem(system){ ECSObject.removeSystem.call(this, system); }// removeSystem
 
-	addComponent(component)   { ECSObject.addComponent.apply(this,    [ component ]); }// addComponent
-	removeComponent(component){ ECSObject.removeComponent.apply(this, [ component ]); }// removeComponent
+	addComponent(component)   { ECSObject.addComponent.call(this,    component); }// addComponent
+	removeComponent(component){ ECSObject.removeComponent.call(this, component); }// removeComponent
 
-	dispatchEvent(event, ...otherArgs){ ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]); }// dispatchEvent
+	dispatchEvent(event, ...otherArgs){ ECSObject.dispatchEvent.call(this, event, ...otherArgs); }// dispatchEvent
 
 	applyProperty(mappedProperty, rawValue){
 		const [ ComponentConstructor, property ] = this.constructor.mappings[mappedProperty];

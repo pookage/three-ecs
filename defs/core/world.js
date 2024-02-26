@@ -17,7 +17,6 @@ export default class World extends Scene {
 	#frame;
 	#deltaTime;
 	#lastTickTime;
-	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 
 	// static state
 	#isPlaying    = false;
@@ -55,7 +54,7 @@ export default class World extends Scene {
 	){
 		super();
 
-		ECSObject.init.apply(this, [ children, systems, components, properties ]);
+		ECSObject.init.call(this, children, systems, components, properties);
 
 		const {
 			samplerate = 1 // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
@@ -66,7 +65,7 @@ export default class World extends Scene {
 
 		// initialise required instances
 		this.#renderer = new WebGLRenderer({ antialias: true });
-		this.#camera   = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
+		this.#camera   = findFirstInstanceWithProperty.call(this, "isCamera");
 
 		// add event listeners
 		window.addEventListener("resize", this.#handleResize);
@@ -78,7 +77,7 @@ export default class World extends Scene {
 		this.#updateStateDimensions();
 
 		// apply any shared connected functionality
-		ECSObject.connected.apply(this);
+		ECSObject.connected.call(this);
 		this.traverse(entity => {
 			if(entity.isEntity) entity.connected();
 		});
@@ -93,7 +92,7 @@ export default class World extends Scene {
 		this.removeEventListener(CAMERA_REMOVED, this.#updatePrimaryCamera);
 
 		// apply any shared disconnected functionality
-		ECSObject.disconnected.apply(this);
+		ECSObject.disconnected.call(this);
 		this.traverse(entity => {
 			if(entity.isEntity) entity.disconnected();
 		});
@@ -106,7 +105,7 @@ export default class World extends Scene {
 			if(!this.#isPlaying){
 				this.#isPlaying = true;
 				
-				ECSObject.play.apply(this);
+				ECSObject.play.call(this);
 				this.traverse(entity => {
 					if(entity.isEntity) entity.play();
 				});
@@ -125,7 +124,7 @@ export default class World extends Scene {
 
 			this.#isPlaying = false;
 			
-			ECSObject.pause.apply(this);
+			ECSObject.pause.call(this);
 			this.traverse(entity => {
 				if(entity.isEntity) entity.pause();
 			});
@@ -136,29 +135,29 @@ export default class World extends Scene {
 
 	add(entity)   { 
 		super.add(entity);
-		ECSObject.add.apply(this, [ entity ]);
+		ECSObject.add.call(this, entity);
 	}// add
 	remove(entity){
-		ECSObject.remove.apply(this, [ entity ]);
+		ECSObject.remove.call(this, entity);
 		super.remove(entity);
 	}// remove
 
 	addSystem(system){
-		ECSObject.addSystem.apply(this, [ system ]);
+		ECSObject.addSystem.call(this, system);
 	}// addSystem
 	removeSystem(system){
-		ECSObject.removeSystem.apply(this, [ system ]);
+		ECSObject.removeSystem.call(this, system);
 	}// removeSystem
 
 	addComponent(component){
-		ECSObject.addComponent.apply(this, [ component ]);
+		ECSObject.addComponent.call(this, component);
 	}// addComponent
 	removeComponent(component){
-		ECSObject.removeComponent.apply(this, [ component ]);
+		ECSObject.removeComponent.call(this, component);
 	}// removeComponent
 
 	dispatchEvent(event, ...otherArgs){
-		ECSObject.dispatchEvent.apply(this, [ event, ...otherArgs ]);
+		ECSObject.dispatchEvent.call(this, event, ...otherArgs);
 	}// dispatchEvent
 
 
@@ -172,9 +171,7 @@ export default class World extends Scene {
 		this.#deltaTime = time - (this.#lastTickTime || time);
 		
 		// apply tick to all components on the scene
-		this.#tickData[0] = time;
-		this.#tickData[1] = this.#deltaTime;
-		ECSObject.tick.apply(this, this.#tickData);
+		ECSObject.tick.call(this, time, this.#deltaTime);
 
 		// apply tick to all entities in the scene
 		this.traverse(entity => {
@@ -195,12 +192,12 @@ export default class World extends Scene {
 
 	#tock = (time, deltaTime) => {
 		// apply tock to all components on the scene
-		ECSObject.tock.apply(this, this.#tickData);
+		ECSObject.tock.call(this, time, deltaTime);
 
 		// apply tock to all entities in the scene
 		this.traverse(entity => {
 			if(entity.isEntity){
-				entity.tick(time, this.#deltaTime);
+				entity.tick(time, deltaTime);
 			}
 		});
 	}// #tock
@@ -246,6 +243,6 @@ export default class World extends Scene {
 	}// #updateCameraDimensions
 
 	#updatePrimaryCamera = () => {
-		this.#camera = findFirstInstanceWithProperty.apply(this, [ "isCamera" ]);
+		this.#camera = findFirstInstanceWithProperty.call(this, "isCamera");
 	}// #updatePrimaryCamera
 }// World

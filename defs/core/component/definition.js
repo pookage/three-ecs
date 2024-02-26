@@ -97,10 +97,7 @@ export default class Component {
 	// DEFAULT LIFECYCLE JAZZ
 	// -------------------------------------
 	constructor(userConfig = {}){
-		const verifiedConfig = parseUnverifiedConfig.apply(this, [
-			userConfig,
-			this.constructor.schema
-		]);
+		const verifiedConfig = parseUnverifiedConfig.call(this, userConfig, this.constructor.schema);
 
 		this.#data = generateReactiveShallowState(verifiedConfig, this.update.bind(this));
 	}// constructor	
