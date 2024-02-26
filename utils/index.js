@@ -95,8 +95,6 @@ export function parseValueWithSchema(value, type, schema = {}){
 	}
 }// parseValueWithSchema
 
-export const componentRegistry = new Map();
-
 export function findFirstInstanceWithProperty(property){
 	let instance = null;
 
