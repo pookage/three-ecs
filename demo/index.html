@@ -20,9 +20,6 @@
 			} from "three-ecs";
 
 			console.log(`					
-					4. once it's working on three-ecs, test it throughly by adding / removing components and confirming they're correctly identified
-					5. confirm that adding / removing systems is working too, and remove the 'toProperCase' function as it'll be no-longer needed
-					6. this will remove the need for the componentRegistry entirely, so it should be removed from the three-ecs export
 					7. this will break three-elements, which relies on the componentRegistry to map attributes to components
 					8. three-elements should, as part of its core, define its own componentRegistry purely for the purpose of mapping attributes to components
 					9. if three-elements has and maintains its own componentRegistry, then I don't THINK it'll need any other refactoring!
@@ -32,7 +29,6 @@
 			// CUSTOM COMPONENTS
 			// ---------------------------------------------
 			class NoisyComponent extends Component {
-
 				static get schema(){
 					return {
 						message: {
@@ -69,7 +65,7 @@
 				constructor(){
 					super();
 
-					this.#interval = setInterval(this.update.bind(this), 1000);
+					this.#interval = setInterval(this.update.bind(this), 5000);
 				}// constructor
 
 				added(entity){
@@ -133,12 +129,15 @@
 			// ---------------------------------------------
 			const world = window.WORLD = new World(
 				[
-					// create a red box to the left
+					// create a red box to the left that says "redredredred" every second
 					new Entity([],[],
 						[
 							new Geometry(),
 							new Material({ color: 0xff0000 }),
-							new Mesh()
+							new Mesh(),
+							new NoisyComponent({
+								message: "redredredredred"
+							})
 						],
 						{
 							position: {
@@ -146,13 +145,15 @@
 							}
 						}
 					),
+					// create a yellow box to the right
 					new Box([],[],[],{
 						color: 0xffff00,
 						position: {
 							x: 2
 						}
 					}),
-					new Entity([],[],
+					// create a camera that says 'ahoy' every second
+					new NoisyEntity([],[],
 						[ 
 							new Camera()
 						],
@@ -164,7 +165,7 @@
 						}
 					)
 				],
-				[] 
+				[ new NoisySystem() ] 
 			);
 			
 			document.body.appendChild(world.canvas);

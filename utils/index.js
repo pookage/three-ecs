@@ -1,7 +1,5 @@
 import { Color, MathUtils, Vector3, Euler } from "three";
 
-import EntityEventDispatcher from "./entity-event-dispatcher.js";
-
 
 const defaultPosition = { x: 0, y: 0, z: 0 };
 const defaultRotation = { x: 0, y: 0, z: 0 };
@@ -64,6 +62,12 @@ function parseObjectAsThreeProperty(value, property){
 	}
 }// parseObjectAsThreeProperty
 
+
+export function parseAsThreeProperty(value, property){
+	if(typeof value === "string") return parseStringAsThreeProperty(value, property);
+	else if(isObject(value))      return parseObjectAsThreeProperty(value, property);
+	else                          return value;
+}// parseAsThreeProperty
 
 export function parseValueWithSchema(value, type, schema = {}){
 	switch(type){
@@ -194,17 +198,3 @@ export function generateReactiveShallowState(initialState, callback){
 export function isObject (obj) {
 	return typeof obj === 'object' && obj !== null
 }// isObject
-
-export function toProperCase(text){
-	// NOTE: this was adapted from: https://stackoverflow.com/questions/64489395/converting-snake-case-string-to-title-case
-	return text.replace (/^[-_]*(.)/, (_, c) => c.toUpperCase()) // Initial char (after -/_)
-	           .replace (/[-_]+(.)/g, (_, c) => c.toUpperCase()) // First char after each -/_	
-}// toProperCase
-
-export function parseAsThreeProperty(value, property){
-	if(typeof value === "string") return parseStringAsThreeProperty(value, property);
-	else if(isObject(value))      return parseObjectAsThreeProperty(value, property);
-	else                          return value;
-}// parseAsThreeProperty
-
-export { EntityEventDispatcher }

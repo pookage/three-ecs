@@ -8,7 +8,6 @@ export default class Entity extends Object3D {
 	// PRIVATE PROPERTIES
 	// -------------------------------------
 	// helpers
-	#component;
 	#tickData = [ 0, 0 ]; // (array) of [ time, deltaTime ] data to be updated and used in the tick() and tock() functions
 	// static state
 	#isAdded      = false;
