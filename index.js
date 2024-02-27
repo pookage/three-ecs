@@ -3,7 +3,7 @@ import World     from "./defs/core/world.js";
 import Entity    from "./defs/core/entity.js";
 import Component from "./defs/core/component/index.js";
 import System    from "./defs/core/system.js";
-import Shader    from "./defs/core/shader.js";
+import Shader    from "./defs/core/shader.glsl.js";
 
 // component definitions
 import Camera   from "./defs/components/camera/index.js";

@@ -1,6 +1,6 @@
 import { Color, MathUtils, Vector3, Euler } from "three";
 
-import Shader from "../defs/core/shader.js"
+import Shader from "../defs/core/shader.glsl.js"
 
 
 const defaultPosition = { x: 0, y: 0, z: 0 };
