@@ -134,7 +134,9 @@
 				static get mappings(){
 					return {
 						...Entity.mappings,
-						"color" : [ Material, "color"  ]
+						"color"        : [ Material, "color"  ],
+						"materialType" : [ Material, "type"   ],
+						"shader"       : [ Material, "shader" ]
 					};
 				}// get mappings
 			}// Box
@@ -149,9 +151,7 @@
 						[
 							new Geometry(),
 							new Material({ 
-								color: 0xff0000,
-								type: "custom",
-								shader: new ScalingShader()
+								color: 0xff0000
 							}),
 							new Mesh(),
 							new NoisyComponent({
@@ -164,13 +164,37 @@
 							}
 						}
 					),
-					// create a yellow box to the right
+
+					// create a sphere behind everything with a normals-shader
+					new Entity([],[],
+						[
+							new Geometry({ 
+								primitive: "sphere",
+								radius: 1
+							}),
+							new Material({ 
+								type: "custom",
+								shader: new Shader()
+							}),
+							new Mesh()
+						],
+						{
+							position: {
+								z: -2,
+								y: 1
+							}
+						}
+					),
+
+					// create a box to the right with a normals-shader that makes it scale up and down
 					new Box([],[],[],{
-						color: 0xffff00,
+						materialType: "custom",
+						shader: new ScalingShader(),
 						position: {
 							x: 1
 						}
 					}),
+
 					// create a camera that says 'ahoy' every second
 					new NoisyEntity([],[],
 						[ 
@@ -184,7 +208,7 @@
 						}
 					)
 				],
-				[ /*new NoisySystem()*/ ],
+				[ new NoisySystem() ],
 				[],
 				{
 					clearColor: 0x000000

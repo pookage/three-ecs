@@ -57,14 +57,13 @@ export default class Entity extends Object3D {
 	){
 		super();
 
+		// define all the systems to be attached to this entity
 		const defaultSystems = this.constructor.defaultSystems.map(DefaultSystem => new DefaultSystem())
-		const systems = [ ...defaultSystems, ...initialSystems ];
+		const systems        = [ ...defaultSystems, ...initialSystems ];
 
 		// define all the components to be attached to this entity
-		const defaultComponents = this.constructor.defaultComponents
-			.entries()
-			.map(([ DefaultComponent, defaultProperties ]) => new DefaultComponent(defaultProperties));
-		const components = [ ...defaultComponents, ...initialComponents ];
+		const defaultComponents = this.#generateDefaultComponents(properties);
+		const components        = [ ...defaultComponents, ...initialComponents ];
 
 		// initialise the entity with functionality shared by all ECS entities
 		ECSObject.init.call(this, children, systems, components, properties);
@@ -143,13 +142,9 @@ export default class Entity extends Object3D {
 	dispatchEvent(event, ...otherArgs){ ECSObject.dispatchEvent.call(this, event, ...otherArgs); }// dispatchEvent
 
 	applyProperty(mappedProperty, rawValue){
-		const [ ComponentConstructor, property ] = this.constructor.mappings[mappedProperty];
-
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
+		const [ ComponentConstructor, property ] = this.constructor.mappings[mappedProperty];
 		if(ComponentConstructor !== Entity){
-
-			console.log("mapping", mappedProperty, "to", `${ComponentConstructor.name}.${property}`)
-
 			this.#components.get(ComponentConstructor).data[property] = parseValueWithSchema(
 				rawValue, 
 				property, 
@@ -183,4 +178,36 @@ export default class Entity extends Object3D {
 			}
 		} 
 	}// applyProperty
+
+
+	// UTILS
+	// -------------------------------------
+	#generateDefaultComponents = (entityProperties) => {
+		return this.constructor.defaultComponents
+			.entries()
+			.map(([ DefaultComponent, defaultProperties ]) => {
+				const initialProperties = {};
+
+				// check if we have any mappings for this component defined on the entity
+				for(const [key, value] of Object.entries(entityProperties)){
+					if(Object.keys(this.constructor.mappings).includes(key)){
+						const [ MappedComponent, property ] = this.constructor.mappings[key];
+
+						if(MappedComponent === DefaultComponent){
+							// add the property to the config for the component
+							initialProperties[property] = value;
+
+							// remove the property so that it isn't re-applied as part of the applyProperty() checks
+							delete entityProperties[key];
+						}	
+					}
+				}
+
+				// initialise our default component with both default and mapped properties
+				return new DefaultComponent({
+					...defaultProperties,
+					...initialProperties
+				});
+			})
+	}// #generateDefaultComponents
 }// Entity
