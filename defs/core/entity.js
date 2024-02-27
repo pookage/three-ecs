@@ -147,6 +147,9 @@ export default class Entity extends Object3D {
 
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
 		if(ComponentConstructor !== Entity){
+
+			console.log("mapping", mappedProperty, "to", `${ComponentConstructor.name}.${property}`)
+
 			this.#components.get(ComponentConstructor).data[property] = parseValueWithSchema(
 				rawValue, 
 				property, 

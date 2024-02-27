@@ -15,16 +15,12 @@
 		<script type="module">
 			import { Color } from "three";
 			import { 
-				World, Entity, Component, System, 
+				World, Entity, Component, System, Shader,
 				Camera, Geometry, Material, Mesh
 			} from "three-ecs";
 
-			console.log(`					
-					7. this will break three-elements, which relies on the componentRegistry to map attributes to components
-					8. three-elements should, as part of its core, define its own componentRegistry purely for the purpose of mapping attributes to components
-					9. if three-elements has and maintains its own componentRegistry, then I don't THINK it'll need any other refactoring!
-			`);
-
+			// CUSTOM SHADERS
+			// ---------------------------------------------
 
 			// CUSTOM COMPONENTS
 			// ---------------------------------------------
@@ -119,7 +115,7 @@
 				static get mappings(){
 					return {
 						...Entity.mappings,
-						"color": [ Material, "color" ]
+						"color" : [ Material, "color"  ]
 					};
 				}// get mappings
 			}// Box
@@ -133,7 +129,11 @@
 					new Entity([],[],
 						[
 							new Geometry(),
-							new Material({ color: 0xff0000 }),
+							new Material({ 
+								color: 0xff0000,
+								type: "custom",
+								shader: new Shader()
+							}),
 							new Mesh(),
 							new NoisyComponent({
 								message: "redredredredred"
@@ -165,7 +165,7 @@
 						}
 					)
 				],
-				[ new NoisySystem() ],
+				[ /*new NoisySystem()*/ ],
 				[],
 				{
 					clearColor: 0x000000
@@ -187,7 +187,6 @@
 			}
 			body {
 				margin: 0;
-				background-color: green;
 			}
 		</style>
 	</head>

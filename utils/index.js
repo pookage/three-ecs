@@ -1,5 +1,7 @@
 import { Color, MathUtils, Vector3, Euler } from "three";
 
+import Shader from "../defs/core/shader.js"
+
 
 const defaultPosition = { x: 0, y: 0, z: 0 };
 const defaultRotation = { x: 0, y: 0, z: 0 };
@@ -91,7 +93,8 @@ export function parseValueWithSchema(value, type, schema = {}){
 			MathUtils.degToRad(parseFloat(value.y ?? schema.default.y)),
 			MathUtils.degToRad(parseFloat(value.z ?? schema.default.z))
 		);
-		default: return new String(value).toString();
+		case "string" : return new String(value).toString();
+		default: return value;
 	}
 }// parseValueWithSchema
 
@@ -111,48 +114,64 @@ export function parseUnverifiedConfig(userConfig, schema){
 	return Object.entries(schema).reduce(
 		(config, [ property, valueSchema ]) => {
 			const {
-				default: defaultValue,
-				oneOf: permittedValues = []
+				requires: propertyRequirements = {}
 			} = valueSchema;
 
-			const doesPropertyExistInSchema = userConfig.hasOwnProperty(property);
-			const doesPropertyHaveValue     = doesPropertyExistInSchema || typeof defaultValue !== undefined;
+			const areRequirementsMet = Object.entries(propertyRequirements).every(([ key, value ]) => ([ 
+				userConfig[key], 
+				schema[key].default, 
+				schema[key].oneOf?.[0] 
+			].includes(value)));
 
-			if(doesPropertyHaveValue){
-				const type               = getSchemaPropertyType(property, valueSchema);
-				const rawValue           = userConfig[property] || defaultValue || permittedValues[0];
-				const value              = parseValueWithSchema(rawValue, type, valueSchema);
-				const isValueCorrectType = verifyType(value, type);
+			if(areRequirementsMet){
+				const {
+					default : defaultValue,
+					oneOf   : permittedValues = [],
+				} = valueSchema;
 
-				if(isValueCorrectType){
-					const hasPermittedValues = permittedValues.length > 0;
-					const isValuePermitted   = hasPermittedValues && permittedValues.includes(value);
+				const doesPropertyExistInSchema = userConfig.hasOwnProperty(property);
+				const doesPropertyHaveValue     = doesPropertyExistInSchema || defaultValue !== undefined || permittedValues[0] !== undefined;
 
-					if(isValuePermitted || !hasPermittedValues ){
-						// Woop! This is the only case in which the property is valid and gets added
-						config[property] = value;
+				if(doesPropertyHaveValue){
+					const type               = getSchemaPropertyType(property, valueSchema);
+					const rawValue           = userConfig[property] || defaultValue || permittedValues[0];
+					const value              = parseValueWithSchema(rawValue, type, valueSchema);
+					const isValueCorrectType = verifyType(value, type);
+
+					if(isValueCorrectType){
+						const hasPermittedValues = permittedValues.length > 0;
+						const isValuePermitted   = hasPermittedValues && permittedValues.includes(value);
+
+						if(isValuePermitted || !hasPermittedValues ){
+							// Woop! This is the only case in which the property is valid and gets added
+							config[property] = value;
+						} else {
+							console.warn(
+								`[WARNING](${this.constructor.name}) Property: '${property}'`,
+								value,
+								"is not one of the values",
+								permittedValues,
+								"permitted by this component - property will be ignored"
+							);
+						}
 					} else {
 						console.warn(
-							`[WARNING](${this.constructor.name}) Property '${property}'`,
+							`[WARNING](${this.constructor.name}) Property: '${property}'`,
 							value,
-							"is not one of the values",
-							permittedValues,
-							"permitted by this component - property will be ignored"
+							`does not match the type ${type} defined in the component schema - property will be ignored.`
 						);
 					}
 				} else {
 					console.warn(
-						`[WARNING](${this.constructor.name}) Property ${property}`,
-						value,
-						`does not match the type ${type} defined in the component schema - property will be ignored.`
+						`[WARNING](${this.constructor.name}) Unable to derive a value for the required property: '${property}' from the ${this.constructor.name} component schema - property will be ignored.`,
+						this
 					);
-				}
+				}	
 			} else {
-				console.warn(
-					`[WARNING](${this.constructor.name}) Unable to derive a value for property ${property} from component schema - property will be ignored.`,
-					this
-				);
+				// don't worry about parsing this property - the requirements that it'd be used under have not been met
 			}
+
+			
 			return config;
 		},
 		{}
@@ -162,12 +181,15 @@ export function parseUnverifiedConfig(userConfig, schema){
 export function verifyType(value, type){
 	switch(type){
 		case "boolean":
-		case "number":
-		case "string": {
-			return typeof value;
-		}
-		case "color": {
-			return value.isColor
+		case "number" :
+		case "string" : return typeof value === type;
+		case "color"  : return value.isColor;
+		case "shader" : return value instanceof Shader;
+		default: {
+			console.warn(
+				`[WARNING](three-ecs) Unknown property type '${type}' - unable to parse value:`,
+				value
+			);
 		}
 	}
 }// verifyType
