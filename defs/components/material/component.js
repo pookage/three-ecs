@@ -87,15 +87,11 @@ export default class Material extends Component {
 				break;
 			}
 			case "custom": {
-				if(CustomShader){
-					material = new ShaderMaterial({
-						uniforms:       CustomShader.constructor.uniforms,
-						vertexShader:   CustomShader.constructor.vertex,
-						fragmentShader: CustomShader.constructor.fragment
-					});	
-				} else {
-					console.error("this should error before now")
-				}
+				material = new ShaderMaterial({
+					uniforms:       CustomShader.constructor.uniforms,
+					vertexShader:   CustomShader.constructor.vertex,
+					fragmentShader: CustomShader.constructor.fragment
+				});	
 				break;
 			}
 			default: {
