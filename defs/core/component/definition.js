@@ -3,6 +3,13 @@ import { parseUnverifiedConfig, generateReactiveShallowState } from "../../../ut
 import { ADDED, REMOVED } from "./events.js";
 
 export default class Component {
+	// PRIVATE PROPERTIES
+	// -------------------------------------
+	// helpers
+	#entity;
+	#data;
+
+	
 	// INTERFACE
 	// -------------------------------------
 	// STATIC PROPERTIES
@@ -22,6 +29,12 @@ export default class Component {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
+	constructor(userConfig = {}){
+		const verifiedConfig = parseUnverifiedConfig.call(this, userConfig, this.constructor.schema);
+
+		this.#data = generateReactiveShallowState(verifiedConfig, this.update.bind(this));
+	}// constructor	
+
 	tick(time, delatTime){}// tick
 	tock(time, delatTime){}// tock
 
@@ -85,20 +98,4 @@ export default class Component {
 	dependencyAdded(component, data){}// dependencyAdded
 	dependencyUpdated(component, property, previous, current){ }// dependencyUpdated
 	dependencyRemoved(component){ }// dependencyRemoved
-
-
-	// PRIVATE PROPERTIES
-	// -------------------------------------
-	// helpers
-	#entity;
-	#data;
-
-
-	// DEFAULT LIFECYCLE JAZZ
-	// -------------------------------------
-	constructor(userConfig = {}){
-		const verifiedConfig = parseUnverifiedConfig.call(this, userConfig, this.constructor.schema);
-
-		this.#data = generateReactiveShallowState(verifiedConfig, this.update.bind(this));
-	}// constructor	
 }// Component
