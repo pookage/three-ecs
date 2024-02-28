@@ -27,6 +27,15 @@ export default class System {
 
 	// PUBLIC METHODS
 	// ~~ lifecycle methods ~~
+	constructor(){
+		if(this.constructor.autoRegister){
+			console.warn(
+				`[WARNING](${this.constructor.name}) The 'autoRegister' property has been defined on the ${this.constructor.name} with`,
+				this.constructor.autoRegister,
+				"- this will have no effect, as the property should be an all-lowercase 'autoregister'. Please rename your getter."
+			);
+		}
+	}// constructor
 	added(entity){
 		entity.addEventListener(COMPONENT_ADDED, this.#autoRegisterComponent);
 		entity.addEventListener(COMPONENT_REMOVED, this.#autoUnregisterComponent);
@@ -106,7 +115,7 @@ export default class System {
 	#autoRegisterComponent = event => {
 		const { component } = event;
 		const shouldComponentAutoRegister = this.constructor.autoregister.some(definition => component instanceof definition );
-
+		
 		if(shouldComponentAutoRegister){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
 			this.#register(component);
