@@ -80,6 +80,7 @@ export default class Material extends Component {
 			shader: CustomShader
 		} = data;
 
+
 		let material;
 		switch(type){
 			case "basic": {

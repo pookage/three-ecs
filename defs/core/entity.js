@@ -84,6 +84,8 @@ export default class Entity extends Object3D {
 
 		// flip the flag to mark this entity as added
 		this.#isAdded = true; 
+
+		console.log(this)
 	}// added
 	removed(){ 
 		// fire removed lifecycle callback on all attached systems
@@ -143,13 +145,31 @@ export default class Entity extends Object3D {
 
 	applyProperty(mappedProperty, rawValue){
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
-		const [ ComponentConstructor, property ] = this.constructor.mappings[mappedProperty];
-		if(ComponentConstructor !== Entity){
-			this.#components.get(ComponentConstructor).data[property] = parseValueWithSchema(
-				rawValue, 
-				property, 
-				ComponentConstructor.schema[property]
-			);
+		const [ MappedConstructor, property ] = this.constructor.mappings[mappedProperty];
+		if(MappedConstructor !== Entity){
+
+			const isMappedComponentRegistered = this.#components.has(MappedConstructor);
+			const TargetComponentConstructor = isMappedComponentRegistered 
+				// if we've registered the mapped component then 
+				? MappedConstructor
+				: this.#components.keys().find(RegisteredConstructor => (
+					RegisteredConstructor.prototype instanceof MappedConstructor
+				));
+
+			if(TargetComponentConstructor){
+				this.#components.get(TargetComponentConstructor).data[property] = parseValueWithSchema(
+					rawValue, 
+					property, 
+					TargetComponentConstructor.schema[property]
+				);
+			} else {
+				console.error(
+					`[ERROR](${this.component.constructor}) Cannot apply mapping for`,
+					MappedConstructor.name, property,
+					`as ${this.component.constructor} does not use the ${MappedConstructor.name} component`,
+					"or any of its subclasses"
+				);
+			}
 		}
 
 		// otherwise assuming we want to manipulate the entity directly and parse it here & now
