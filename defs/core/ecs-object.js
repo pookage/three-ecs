@@ -55,6 +55,7 @@ const ECSObject = {
 	}, // pause
 
 	tick(time, deltaTime){
+		// NOTE: systems need to come after components for ticks
 		// fire tick lifecycle callback on all attached systems
 		for(sys of this.systems.values()) sys.tick(time, deltaTime);
 		// fire tick lifecycle callback on all attached components
@@ -64,7 +65,7 @@ const ECSObject = {
 		// fire tock lifecycle callback on all attached systems
 		for(sys of this.systems.values()) sys.tock(time, deltaTime);
 		// fire tock lifecycle callback on all attached components
-		for(comp of this.components.values()) comp.tock(time, deltaTime);
+		for(comp of this.components.values()){ comp.tock(time, deltaTime); }
 	}, // tock
 
 

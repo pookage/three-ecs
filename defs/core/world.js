@@ -176,9 +176,6 @@ export default class World extends Scene {
 		
 		// calculate the time since our last tick
 		this.#deltaTime = time - (this.#lastTickTime || time);
-		
-		// apply tick to all components on the scene
-		ECSObject.tick.call(this, time, this.#deltaTime);
 
 		// apply tick to all entities in the scene
 		this.traverse(entity => {
@@ -186,6 +183,9 @@ export default class World extends Scene {
 				entity.tick(time, this.#deltaTime);
 			}
 		});
+
+		// apply tick to all components on the scene
+		ECSObject.tick.call(this, time, this.#deltaTime);
 		
 		// render the new scene
 		this.#renderer.render(this, this.#camera);
@@ -204,7 +204,7 @@ export default class World extends Scene {
 		// apply tock to all entities in the scene
 		this.traverse(entity => {
 			if(entity.isEntity){
-				entity.tick(time, deltaTime);
+				entity.tock(time, deltaTime);
 			}
 		});
 	}// #tock

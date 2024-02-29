@@ -58,19 +58,10 @@ export default class System {
 	update(){ } // update
 	
 	register(component){
-		this.#register(component);
-	}// register
-	unregister(component){
-		this.#unregister(component);
-	}// unregister
-
-
-	// UTILS
-	// -------------------------------------
-	#register = component => {
 		const hasRegisteredComponent = this.#registeredComponentList.has(component);
 
 		if(!hasRegisteredComponent){
+			// NOTE: this won't work with instanceof and won't group subclasses
 			const name = component.constructor.name;
 
 			// add the component to the list of registered components
@@ -88,8 +79,8 @@ export default class System {
 			);
 		}
 		
-	}// #register
-	#unregister = component => {
+	}// register
+	unregister(component){
 		const hasRegisteredComponent = this.#registeredComponentList.has(component);
 
 		if(hasRegisteredComponent){
@@ -109,7 +100,6 @@ export default class System {
 	}// unregister
 
 
-
 	// EVENT HANDLERS
 	// -------------------------------------
 	#autoRegisterComponent = event => {
@@ -118,7 +108,7 @@ export default class System {
 		
 		if(shouldComponentAutoRegister){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
-			this.#register(component);
+			this.register(component);
 		}
 	}// #autoRegisterComponent
 
@@ -128,7 +118,7 @@ export default class System {
 
 		if(shouldComponentAutoUnregister){
 			event.stopPropagation(); // this would enforce that components can only be registered to one system; is that what we want?
-			this.#unregister(component);	
+			this.unregister(component);	
 		}
 	}// #autoUnregisterComponent
 }// System
