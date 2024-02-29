@@ -54,8 +54,9 @@ export default class Mesh extends Component {
 	// UTILS
 	// ---------------------------------
 	#replaceMesh = entity => {
-		const geometry        = entity.components.get(Geometry)?.geometry;
-		const material        = entity.components.get(Material)?.material;
+		const geometry = entity.getComponent(Geometry)?.geometry;
+		const material = entity.getComponent(Material)?.material;
+
 		const geometryChanged = this.#mesh?.geometry !== geometry;
 		const materialChanged = this.#mesh?.material !== material;
 

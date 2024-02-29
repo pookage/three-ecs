@@ -142,6 +142,14 @@ export default class Entity extends Object3D {
 
 	addComponent(component)   { ECSObject.addComponent.call(this,    component); }// addComponent
 	removeComponent(component){ ECSObject.removeComponent.call(this, component); }// removeComponent
+	getComponent(ComponentConstructor)   {
+		return this.#components.get(
+			this.#components.keys().find(Constructor => (
+				Constructor === ComponentConstructor ||
+				Constructor.prototype instanceof ComponentConstructor
+			))
+		);
+	}// getComponent
 
 	dispatchEvent(event, ...otherArgs){ ECSObject.dispatchEvent.call(this, event, ...otherArgs); }// dispatchEvent
 
@@ -149,20 +157,13 @@ export default class Entity extends Object3D {
 		// if we're not targeting the entity, then assume we're targeting a component and let that component handle the parsing
 		const [ MappedConstructor, property ] = this.constructor.mappings[mappedProperty];
 		if(MappedConstructor !== Entity){
-
-			const isMappedComponentRegistered = this.#components.has(MappedConstructor);
-			const TargetComponentConstructor = isMappedComponentRegistered 
-				// if we've registered the mapped component then 
-				? MappedConstructor
-				: this.#components.keys().find(RegisteredConstructor => (
-					RegisteredConstructor.prototype instanceof MappedConstructor
-				));
-
-			if(TargetComponentConstructor){
-				this.#components.get(TargetComponentConstructor).data[property] = parseValueWithSchema(
+			const targetComponent = this.getComponent(MappedConstructor);
+			
+			if(targetComponent){
+				targetComponent.data[property] = parseValueWithSchema(
 					rawValue, 
 					property, 
-					TargetComponentConstructor.schema[property]
+					targetComponent.constructor.schema[property]
 				);
 			} else {
 				console.error(
