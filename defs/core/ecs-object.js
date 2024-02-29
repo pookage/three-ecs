@@ -71,6 +71,9 @@ const ECSObject = {
 	// UTILS
 	// -------------------------------------
 	add(entity){
+
+		console.log("adding", entity)
+
 		if(entity.isEntity){
 			// fire lifecycle methods as applicable
 			if(this.isAdded)     entity.added();

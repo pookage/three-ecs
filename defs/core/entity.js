@@ -76,7 +76,9 @@ export default class Entity extends Object3D {
 		}
 	}// constructor
 
-	added()  { 
+	added() {
+		// fire added lifecycle callback on all child entities
+		for(const child of this.children) if(child.isEntity) child.added(this);
 		// fire added lifecycle callback on all attached systems
 		for(const system of this.systems.values()) system.added(this);
 		// fire added lifecycle callback on all attached components
@@ -84,10 +86,10 @@ export default class Entity extends Object3D {
 
 		// flip the flag to mark this entity as added
 		this.#isAdded = true; 
-
-		console.log(this)
 	}// added
 	removed(){ 
+		// fire added lifecycle callback on all child entities
+		for(const child of this.children) if(child.isEntity) child.added(this);
 		// fire removed lifecycle callback on all attached systems
 		for(const system of this.systems.values()) system.removed(this);
 		// fire removed lifecycle callback on all attached components
@@ -125,8 +127,8 @@ export default class Entity extends Object3D {
 		ECSObject.tock.call(this, time, deltaTime);
 	}// #tock
 
-	add(entity, ...otherArgs){
-		super.add(entity, ...otherArgs);
+	add(entity){
+		super.add(entity);
 		ECSObject.add.call(this, entity); 
 	}// add
 	remove(entity){ 
