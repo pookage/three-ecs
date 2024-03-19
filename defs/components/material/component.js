@@ -1,4 +1,8 @@
-import { MeshBasicMaterial, ShaderMaterial, Color } from "three";
+import { 
+	Color, 
+	DoubleSide,
+	MeshBasicMaterial, MeshStandardMaterial, ShaderMaterial, 
+} from "three";
 
 import Component from "../../core/component/index.js";
 
@@ -18,6 +22,7 @@ export default class Material extends Component {
 			type: {
 				oneOf: [
 					"basic",
+					"standard",
 					"custom"
 				]
 			},
@@ -85,6 +90,10 @@ export default class Material extends Component {
 		switch(type){
 			case "basic": {
 				material = new MeshBasicMaterial({ color })
+				break;
+			}
+			case "standard": {
+				material = new MeshStandardMaterial({ color });
 				break;
 			}
 			case "custom": {

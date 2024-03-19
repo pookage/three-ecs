@@ -14,13 +14,24 @@ export default class Mesh extends Component {
 
 	// INTERFACE
 	// -------------------------------------
-	// STATIC PROPERTIES
+	// STATIC PROPERTIES#
 	static get dependencies(){
 		return [ 
 			Geometry, 
 			Material 
 		];
 	}// dependencies
+
+	static get schema(){
+		return {
+			castShadow: {
+				default: true
+			},
+			receiveShadow: {
+				default: true
+			}
+		}
+	}// schema
 
 	// PUBLIC PROPERTIES
 	get mesh(){ return this.#mesh; }
@@ -35,6 +46,18 @@ export default class Mesh extends Component {
 		super.removed(entity); 
 		entity.remove(this.#mesh); 
 	}// removed
+
+	update(property, previous, current){
+		if(previous !== current){
+			switch(property){
+				case "castShadow":
+				case "receiveShadow": {
+					this.#mesh[property] = (/true/).test(current);
+					break;
+				}
+			}
+		}
+	}// update
 
 	// ~~ dependency lifecycle methods ~~
 	dependencyAdded(component, data){
@@ -66,14 +89,30 @@ export default class Mesh extends Component {
 			if(this.#mesh) entity.remove(this.#mesh)
 
 			// build a new mesh with the new data
-			const mesh = this.#mesh = this.#createMesh(geometry, material);
+			const mesh = this.#mesh = this.#createMesh(geometry, material, this.data);
 
 			// add the new mesh to the scene
 			entity.add(mesh);
 		}
 	}// #replaceMesh
-	#createMesh = (geometry, material) => {
-		// add the newly-modified mesh
-		return new THREEMesh(geometry, material)	
+	#createMesh = (geometry, material, data) => {
+		const {
+			castShadow,
+			receiveShadow
+		} = data;
+
+		// define the newly-modified mesh
+		const mesh = new THREEMesh(geometry, material);
+
+		console.log(this, {
+			castShadow,
+			receiveShadow
+		})
+
+		// configure it with schema properties
+		mesh.castShadow    = castShadow;
+		mesh.receiveShadow = receiveShadow;
+
+		return mesh;
 	}// #createMesh
 }// Mesh

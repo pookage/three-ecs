@@ -1,4 +1,4 @@
-import { Scene, WebGLRenderer } from "three";
+import { Scene, WebGLRenderer, PCFSoftShadowMap, SRGBColorSpace } from "three";
 
 import ECSObject from "./ecs-object.js";
 import { findFirstInstanceWithProperty } from "../../utils/index.js";
@@ -57,9 +57,10 @@ export default class World extends Scene {
 		ECSObject.init.call(this, children, systems, components, properties);
 
 		const {
-			samplerate   = 1,        // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
-			clearColor   = 0xffffff, // (Color) what colour to clear the canvas with between frames
-			opacity      = 1.0       // (number)[0-1] what opacity to apply to the clearColor
+			samplerate    = 1,        // (number) how much to upsample / downsample the user's resolution (below 1 is downsampling)
+			clearColor    = 0xffffff, // (Color) what colour to clear the canvas with between frames
+			opacity       = 1.0,      // (number)[0-1] what opacity to apply to the clearColor
+			enableShadows = true      // (boolean) whether or not to use the THREE.js shadows in the scene
 		} = properties;
 
 		// adopt properties
@@ -73,6 +74,9 @@ export default class World extends Scene {
 
 		// configure core instances
 		renderer.setClearColor(clearColor, opacity);
+		renderer.shadowMap.enabled = enableShadows;
+		renderer.shadowMap.type    = PCFSoftShadowMap;
+		renderer.outputColorSpace = SRGBColorSpace;
 
 		// add event listeners
 		window.addEventListener("resize", this.#handleResize);

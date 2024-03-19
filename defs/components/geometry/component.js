@@ -1,4 +1,4 @@
-import { BoxGeometry, SphereGeometry } from "three";
+import { BoxGeometry, PlaneGeometry, SphereGeometry } from "three";
 
 import Component from "../../core/component/index.js";
 
@@ -17,7 +17,8 @@ export default class Geometry extends Component {
 			primitive: {
 				oneOf: [
 					"box",
-					"sphere"
+					"sphere",
+					"plane"
 				]
 			},
 			width: {
@@ -68,6 +69,15 @@ export default class Geometry extends Component {
 				} = data;
 
 				geometry = new BoxGeometry(width, height, depth);
+				break;
+			}
+			case "plane": {
+				const {
+					width, 
+					height
+				} = data;
+
+				geometry = new PlaneGeometry(width, height);
 				break;
 			}
 			case "sphere": {
