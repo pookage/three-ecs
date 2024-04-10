@@ -33,6 +33,9 @@ export default class Entity extends Object3D {
 	static get defaultComponents(){
 		return new Map();
 	}// get defaultComponents
+	static get defaultProperties(){
+		return {};
+	}// get defaultProperties
 
 	// PUBLIC PROPERTIES
 	// ~~ getters ~~
@@ -53,9 +56,11 @@ export default class Entity extends Object3D {
 		children          = [], 
 		initialSystems    = [],
 		initialComponents = [],
-		properties        = {}
+		initialProperties = {}
 	){
 		super();
+
+		const properties = { ...this.constructor.defaultProperties, ...initialProperties };
 
 		// define all the systems to be attached to this entity
 		const defaultSystems = this.constructor.defaultSystems.map(DefaultSystem => new DefaultSystem())
