@@ -44,7 +44,7 @@ export default class Mesh extends Component {
 	}// added
 	removed(entity){
 		super.removed(entity); 
-		entity.remove(this.#mesh); 
+		if(this.#mesh) entity.remove(this.#mesh); 
 	}// removed
 
 	update(property, previous, current){

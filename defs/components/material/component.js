@@ -35,6 +35,9 @@ export default class Material extends Component {
 				requires: {
 					type: "custom"
 				}
+			},
+			lights: {
+				default: false
 			}
 		}
 	}// get schema
@@ -82,7 +85,8 @@ export default class Material extends Component {
 		const {
 			color,
 			type,
-			shader: CustomShader
+			shader: CustomShader,
+			lights
 		} = data;
 
 
@@ -98,6 +102,7 @@ export default class Material extends Component {
 			}
 			case "custom": {
 				material = new ShaderMaterial({
+					lights,
 					uniforms:       CustomShader.constructor.uniforms,
 					vertexShader:   CustomShader.constructor.vertex,
 					fragmentShader: CustomShader.constructor.fragment
