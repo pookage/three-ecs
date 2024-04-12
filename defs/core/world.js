@@ -17,6 +17,8 @@ export default class World extends Scene {
 	#frame;
 	#deltaTime;
 	#lastTickTime;
+	#width;
+	#height;
 
 	// static state
 	#isPlaying    = false;
@@ -24,6 +26,7 @@ export default class World extends Scene {
 	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
+	#states       = new Set(); // (Set) of discrete states currently applied to this entity
 
 
 	// INTERFACE
@@ -40,6 +43,9 @@ export default class World extends Scene {
 	get isPlaying()    { return this.#isPlaying;           }
 	get isConnected()  { return this.#isConnected;         }
 	get isAdded()      { return true;                      }
+	get width()        { return this.#width;               }
+	get height()       { return this.#height;              }
+	get states()       { return this.#states;              }
 
 	// ~~ setters ~~
 	set isConnected(isConnected){ this.#isConnected = isConnected; }
@@ -229,6 +235,10 @@ export default class World extends Scene {
 			width: newWidth,
 			height: newHeight
 		} = (this.canvas.getRootNode().host || this.canvas.parentElement || this.canvas).getBoundingClientRect();
+
+		// cache the dimensions to be used by later systems
+		this.#width  = newWidth;
+		this.#height = newHeight;
 
 		// if we don't have any dimensions yet, then assume something went wrong and to re-check ASAP
 		if(newWidth === 0 || newHeight === 0) requestAnimationFrame(this.#updateStateDimensions)

@@ -104,11 +104,6 @@ export default class Mesh extends Component {
 		// define the newly-modified mesh
 		const mesh = new THREEMesh(geometry, material);
 
-		console.log(this, {
-			castShadow,
-			receiveShadow
-		})
-
 		// configure it with schema properties
 		mesh.castShadow    = castShadow;
 		mesh.receiveShadow = receiveShadow;

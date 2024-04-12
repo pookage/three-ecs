@@ -61,8 +61,8 @@ export default class System {
 		const hasRegisteredComponent = this.#registeredComponentList.has(component);
 
 		if(!hasRegisteredComponent){
-			// NOTE: this won't work with instanceof and won't group subclasses
-			const name = component.constructor.name;
+			// NOTE: this won't currently group subclasses
+			const name = component.constructor;
 
 			// add the component to the list of registered components
 			this.#registeredComponentList.add(component);

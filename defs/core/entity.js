@@ -14,6 +14,7 @@ export default class Entity extends Object3D {
 	#systems      = new Map(); // (Map) containing every System instance attached to this entity
 	#components   = new Map(); // (Map) containing every Component instance attached to this entity
 	#dependencies = new Map(); // (Map) which components rely on which other components on this entity
+	#states       = new Set(); // (Set) of discrete states currently applied to this entity
 
 
 	// INTERFACE
@@ -39,6 +40,7 @@ export default class Entity extends Object3D {
 
 	// PUBLIC PROPERTIES
 	// ~~ getters ~~
+	get states()       { return this.#states;       }
 	get systems()      { return this.#systems;      }
 	get components()   { return this.#components;   }
 	get dependencies() { return this.#dependencies; }
